@@ -25,6 +25,8 @@ public class SpawnTiles : MonoBehaviour {
     private List<HexTile> hexTileList;
     private Vector2 OriginTileWorldOffset = new Vector2(-1.0f,-1.0f);
 
+    private List<HexTile> tempTiles = new List<HexTile>();
+
     //Temp map positions that will generate the map off of
     private Vector2[] tempMap = 
     {
@@ -128,7 +130,43 @@ public class SpawnTiles : MonoBehaviour {
         buildMap(tempMap);
     }
 	
+    //Wont create one if a tile already exists at location
+    public void addNewTempTile(Vector2 newTempTilePosition)
+    {
+        if (getTileFromHexCoord(newTempTilePosition) == null)
+        {
+            GameObject go = (GameObject)Instantiate(hexTile, hexCoordToPixelCoord(newTempTilePosition), Quaternion.identity);
+            HexTile hexTileScript = (HexTile)go.GetComponent(typeof(HexTile));
+            hexTileScript.initialize();
+            hexTileScript.setCoords(newTempTilePosition);
+            tempTiles.Add(hexTileScript);
+        }
+    }
 
+
+    public void clearAllTempTiles()
+    {
+        for (int i = 0; i < tempTiles.Count; i++ )
+        {
+            Destroy(tempTiles[i].gameObject);
+        }
+
+        tempTiles.Clear();
+    }
+
+
+    HexTile getTempTile(Vector2 hexCoord)
+    {
+        for (int i = 0; i < tempTiles.Count; i++)
+        {
+            //print(tempTiles[i].getCoords());
+            if (tempTiles[i].getCoords() == hexCoord)
+            {
+                return tempTiles[i];
+            }
+        }
+        return null;
+    }
 
     void buildMap(Vector2[] hexCoordMap)
     {
@@ -194,14 +232,21 @@ public class SpawnTiles : MonoBehaviour {
 
 
 
-    public HexTile getTileFromHexCoord(Vector2 hexCoord)
+    public HexTile getTileFromHexCoord(Vector2 hexCoord, bool getTempTiles = false)
     {
+        HexTile outHexTile = null;
         int hCx = (int)hexCoord.x;int hCy = (int)hexCoord.y;
         if (hCx >= minCoords.x && hCy >= minCoords.y && hCx <= maxCoords.x && hCy <= maxCoords.y)
         {
-            return hexTileList[getIndexFromHexCoord(hexCoord)];
+            outHexTile = hexTileList[getIndexFromHexCoord(hexCoord)];
         }
-        return null;
+        if (getTempTiles && outHexTile == null)
+        {
+            //print("MEOW KITTY CATS!!!");
+            outHexTile = getTempTile(hexCoord);
+            //print(outHexTile.getCoords());
+        }
+        return outHexTile;
     }
 
 
@@ -233,30 +278,43 @@ public class SpawnTiles : MonoBehaviour {
 
 
 
-    public List<HexTile> getAdjacentTiles(HexTile centerTile)
+    public List<HexTile> getAdjacentTiles(HexTile centerTile, bool getTempTiles = false)
     {
         List<HexTile> adjacents = new List<HexTile>();
         Vector2 centerCoord = centerTile.getCoords();
-        for (int y = -1; y < 2; y++ )
+
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(0, 1), getTempTiles));
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(1, 0), getTempTiles));
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(1, -1), getTempTiles));
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(0, -1), getTempTiles));
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(-1, 0), getTempTiles));
+        adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(-1, 1), getTempTiles));
+
+
+        /*for (int y = -1; y < 2; y++ )
         {
             for (int x = -1; x < 2; x++)
             {
                 if ((x == 0 && y == 0) || (x == -1 && y == -1) || (x == 1 && y == 1))
+                {
                     continue;
+                }
                 //GameObject aGo = getTileFromCoords(new Vector2(centerCoord.x+x, centerCoord.y+y));
                 HexTile aTile = getTileFromHexCoord(new Vector2(centerCoord.x + x, centerCoord.y + y));
                 if (aTile != null)
+                {
                     adjacents.Add(aTile);
+                }
             }
-        }
+        }*/
         return adjacents;
     }
 
     
 
-    public HexTile getTileAtPixelPos(Vector2 pixelPos)
+    public HexTile getTileAtPixelPos(Vector2 pixelPos, bool getTempTiles = false)
     {
-        return ( getTileFromHexCoord( pixelCoordToHex(new Vector2(pixelPos.x - OriginTileWorldOffset.x, pixelPos.y - OriginTileWorldOffset.y))));
+        return ( getTileFromHexCoord( pixelCoordToHex(new Vector2(pixelPos.x - OriginTileWorldOffset.x, pixelPos.y - OriginTileWorldOffset.y)), getTempTiles));
     }
 
 

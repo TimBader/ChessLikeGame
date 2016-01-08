@@ -71,6 +71,13 @@ public class HexTile : MonoBehaviour {
 
 
 
+    public TileState getCurrentTileState()
+    {
+        return currentState;
+    }
+
+
+
     public void setCoords(Vector2 newHexCoord)
     {
         hexCoord = newHexCoord;

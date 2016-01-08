@@ -10,21 +10,41 @@ public enum UnitType
 
 public class UnitScript : MonoBehaviour {
 
-    public Sprite tempOtherSprite;
-    public Sprite King0Sprite;
-    public Sprite King1Sprite;
-
     private HexTile occupyingHexTile = null;
-    private List<Vector2> movePositions;
+    //private List<Vector2> movePositions;
     private uint teamNumber = 0;
     private bool garbage = false;
     private UnitType unitType = UnitType.BasicUnit;
 
+    private SpriteRenderer colorsSpriteRenderer = null;
+    private SpriteRenderer baseSpriteRenderer = null;
 
+    private UnitInfo unitInfo;
+
+    private AbsoluteDirection rotationDirection = AbsoluteDirection.UP;
 
     public HexTile getOccupyingHex()
     {
         return occupyingHexTile;
+    }
+
+    public void initialize(UnitInfo info)
+    {
+        SpriteRenderer[] list = GetComponentsInChildren<SpriteRenderer>();
+        if (list.Length != 2)
+        {
+            throw new UnityException("Dude... you need two childern of a unit with spriterenders in them... re-attach them please");
+        }
+        unitInfo = info;
+        baseSpriteRenderer = list[0];
+        colorsSpriteRenderer = list[1];
+    }
+
+
+
+    public UnitInfo getUnitInfo()
+    {
+        return unitInfo;
     }
 
 
@@ -35,8 +55,17 @@ public class UnitScript : MonoBehaviour {
     }
 
 
+    public void setRotationDirection(AbsoluteDirection rotationDir)
+    {
+        rotationDirection = rotationDir;
+    }
 
-    public void setMovePositions(List<Vector2> newMovePositions)
+    public AbsoluteDirection getRotation()
+    {
+        return rotationDirection;
+    }
+
+    /*public void setMovePositions(List<Vector2> newMovePositions)
     {
         movePositions = newMovePositions;
     }
@@ -46,6 +75,20 @@ public class UnitScript : MonoBehaviour {
     public List<Vector2> getMovePositions()
     {
         return movePositions;
+    }*/
+
+
+
+    public SpriteRenderer getBaseSpriteRenderer()
+    {
+        return baseSpriteRenderer;
+    }
+
+
+
+    public SpriteRenderer getColorsSpriteRenderer()
+    {
+        return colorsSpriteRenderer;
     }
 
 
@@ -53,10 +96,10 @@ public class UnitScript : MonoBehaviour {
     public void setTeam(uint teamNum)
     {
         teamNumber = teamNum;
-        if (teamNum == 1)
+        /*if (teamNum == 1)
         {
             GetComponent<SpriteRenderer>().sprite = tempOtherSprite;
-        }
+        }*/
     }
 
 
@@ -78,26 +121,20 @@ public class UnitScript : MonoBehaviour {
     public void destroyUnit()
     {
         garbage = true;
+        DestroyObject(baseSpriteRenderer);
+        DestroyObject(colorsSpriteRenderer);
         DestroyObject(this.gameObject);
+        
     }
 
 
 
     public void setUnitType(UnitType newUnitType)
     {
-        if (newUnitType == UnitType.KingUnit)
-        {
-            if (teamNumber == 0)
-            {
-                GetComponent<SpriteRenderer>().sprite = King0Sprite;
-            }
-            else
-            {
-                GetComponent<SpriteRenderer>().sprite = King1Sprite;
-            }
-        }
         unitType = newUnitType;
     }
+
+
 
     public UnitType getUnitType()
     {
