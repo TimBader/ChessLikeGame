@@ -54,16 +54,6 @@ public enum AbsoluteDirection
     UP_LEFT
 };
 
-/*public static class RelativeRotations
-{
-    public static RelativeRotationPositions UP = new RelativeRotationPositions(new Vector2(0, 1), new Vector2(1, 0));
-    public static RelativeRotationPositions UP_RIGHT = new RelativeRotationPositions(new Vector2(1, 0), new Vector2(1, -1));
-    public static RelativeRotationPositions DOWN_RIGHT = new RelativeRotationPositions(new Vector2(1, -1), new Vector2(0, -1));
-    public static RelativeRotationPositions DOWN = new RelativeRotationPositions(new Vector2(0, -1), new Vector2(-1, 0));
-    public static RelativeRotationPositions DOWN_LEFT = new RelativeRotationPositions(new Vector2(-1, 0), new Vector2(-1, 1));
-    public static RelativeRotationPositions UP_LEFT = new RelativeRotationPositions(new Vector2(-1, 1), new Vector2(0, 1));
-};*/
-
 public enum InteractionStates
 {
     SelectingKingLocation,

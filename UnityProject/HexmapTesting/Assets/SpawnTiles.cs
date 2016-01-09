@@ -28,7 +28,159 @@ public class SpawnTiles : MonoBehaviour {
     private List<HexTile> tempTiles = new List<HexTile>();
 
     //Temp map positions that will generate the map off of
-    private Vector2[] tempMap = 
+    private Vector2[] tempMap =
+    {
+        new Vector2(0,0),
+        new Vector2(2,-1),
+        new Vector2(4,-2),
+        new Vector2(6,-3),
+
+        new Vector2(1,0),
+        new Vector2(3,-1),
+        new Vector2(5,-2),
+        new Vector2(7,-3),
+
+        new Vector2(0,1),
+        new Vector2(2,0),
+        new Vector2(4,-1),
+        new Vector2(6,-2),
+
+        new Vector2(1,1),
+        new Vector2(3,0),
+        new Vector2(5,-1),
+        new Vector2(7,-2),
+
+        new Vector2(0,2),
+        new Vector2(2,1),
+        new Vector2(4,0),
+        new Vector2(6,-1),
+
+        new Vector2(1,2),
+        new Vector2(3,1),
+        new Vector2(5,0),
+        new Vector2(7,-1),
+
+        new Vector2(0,3),
+        new Vector2(2,2),
+        new Vector2(4,1),
+        new Vector2(6,0),
+
+        new Vector2(1,3),
+        new Vector2(3,2),
+        new Vector2(5,1),
+        new Vector2(7,0),
+
+        new Vector2(0,4),
+        new Vector2(2,3),
+        new Vector2(4,2),
+        new Vector2(6,1),
+
+        new Vector2(1,4),
+        new Vector2(3,3),
+        new Vector2(5,2),
+        new Vector2(7,1),
+
+        new Vector2(0,5),
+        new Vector2(2,4),
+        new Vector2(4,3),
+        new Vector2(6,2),
+
+        new Vector2(1,5),
+        new Vector2(3,4),
+        new Vector2(5,3),
+        new Vector2(7,2),
+
+        new Vector2(0,6),
+        new Vector2(2,5),
+        new Vector2(4,4),
+        new Vector2(6,3),
+
+        new Vector2(1,6),
+        new Vector2(3,5),
+        new Vector2(5,4),
+        new Vector2(7,3),
+
+        new Vector2(0,7),
+        new Vector2(2,6),
+        new Vector2(4,5),
+        new Vector2(6,4),
+
+        new Vector2(1,7),
+        new Vector2(3,6),
+        new Vector2(5,5),
+        new Vector2(7,4),
+
+        new Vector2(0,8),
+        new Vector2(2,7),
+        new Vector2(4,6),
+        new Vector2(6,5),
+
+        new Vector2(1,8),
+        new Vector2(3,7),
+        new Vector2(5,6),
+        new Vector2(7,5),
+
+
+        new Vector2(0,9),
+        new Vector2(2,8),
+        new Vector2(4,7),
+        new Vector2(6,6),
+
+        new Vector2(1,9),
+        new Vector2(3,8),
+        new Vector2(5,7),
+        new Vector2(7,6),
+
+
+        new Vector2(0,10),
+        new Vector2(2,9),
+        new Vector2(4,8),
+        new Vector2(6,7),
+
+        new Vector2(1,10),
+        new Vector2(3,9),
+        new Vector2(5,8),
+        new Vector2(7,7),
+
+
+        new Vector2(0,11),
+        new Vector2(2,10),
+        new Vector2(4,9),
+        new Vector2(6,8),
+
+        new Vector2(1,11),
+        new Vector2(3,10),
+        new Vector2(5,9),
+        new Vector2(7,8),
+
+    };
+    
+    //Spawn points for teams
+    private Vector2[] tempTeam0SpawnPoints = 
+    {
+        new Vector2(0, 0),
+        new Vector2(1, 0),
+        new Vector2(2, -1),
+        new Vector2(3, -1),
+        new Vector2(4, -2),
+        new Vector2(5, -2),
+        new Vector2(6, -3),
+        new Vector2(7, -3)
+    };
+
+    private Vector2[] tempTeam1SpawnPoints =
+    {
+        new Vector2(0, 11),
+        new Vector2(1, 11),
+        new Vector2(2, 10),
+        new Vector2(3, 10),
+        new Vector2(4, 9),
+        new Vector2(5, 9),
+        new Vector2(6, 8),
+        new Vector2(7, 8)
+    };
+
+    /* private Vector2[] tempMap = 
     {
       new Vector2(-3,0),
       new Vector2(-3,1),
@@ -120,7 +272,7 @@ public class SpawnTiles : MonoBehaviour {
         new Vector2(1, 5),
         new Vector2(2, 4),
         new Vector2(3, 4)
-    };
+    };*/
 
 
 
