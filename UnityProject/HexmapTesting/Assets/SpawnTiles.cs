@@ -2,6 +2,58 @@
 using System.Collections;
 using System.Collections.Generic;
 
+//Helps store information usefully for hex-tile rotations
+public class RotationDirectionObject
+{
+    public static RotationDirectionObject UP = new RotationDirectionObject(new Vector2(0, 1), new Vector2(1, 0));
+    public static RotationDirectionObject UP_RIGHT = new RotationDirectionObject(new Vector2(1, 0), new Vector2(1, -1));
+    public static RotationDirectionObject DOWN_RIGHT = new RotationDirectionObject(new Vector2(1, -1), new Vector2(0, -1));
+    public static RotationDirectionObject DOWN = new RotationDirectionObject(new Vector2(0, -1), new Vector2(-1, 0));
+    public static RotationDirectionObject DOWN_LEFT = new RotationDirectionObject(new Vector2(-1, 0), new Vector2(-1, 1));
+    public static RotationDirectionObject UP_LEFT = new RotationDirectionObject(new Vector2(-1, 1), new Vector2(0, 1));
+
+    private Vector2 upDirection;
+    private Vector2 rightDirection;
+
+    private RotationDirectionObject(Vector2 upDir, Vector2 rightDir)
+    {
+        upDirection = upDir;
+        rightDirection = rightDir;
+    }
+
+    public Vector2 getUpDirection()
+    {
+        return upDirection;
+    }
+
+    public Vector2 getRightDirection()
+    {
+        return rightDirection;
+    }
+};
+
+//Relative
+public enum RelativeDirection
+{
+    FORWARD,
+    FORWARD_RIGHT,
+    BACKWARD_RIGHT,
+    BACKWARD,
+    BACKWARD_LEFT,
+    FORWARD_LEFT
+};
+
+//Absolute
+public enum AbsoluteDirection
+{
+    UP,
+    UP_RIGHT,
+    DOWN_RIGHT,
+    DOWN,
+    DOWN_LEFT,
+    UP_LEFT
+};
+
 public class SpawnTiles : MonoBehaviour {
 
 
@@ -442,23 +494,6 @@ public class SpawnTiles : MonoBehaviour {
         adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(-1, 0), getTempTiles));
         adjacents.Add(getTileFromHexCoord(centerCoord + new Vector2(-1, 1), getTempTiles));
 
-
-        /*for (int y = -1; y < 2; y++ )
-        {
-            for (int x = -1; x < 2; x++)
-            {
-                if ((x == 0 && y == 0) || (x == -1 && y == -1) || (x == 1 && y == 1))
-                {
-                    continue;
-                }
-                //GameObject aGo = getTileFromCoords(new Vector2(centerCoord.x+x, centerCoord.y+y));
-                HexTile aTile = getTileFromHexCoord(new Vector2(centerCoord.x + x, centerCoord.y + y));
-                if (aTile != null)
-                {
-                    adjacents.Add(aTile);
-                }
-            }
-        }*/
         return adjacents;
     }
 
@@ -548,4 +583,129 @@ public class SpawnTiles : MonoBehaviour {
         }
     }
 
+
+    //Checks to see if given Vector is considered an adjacent position relative to (0,0)
+    public static bool checkValidAdjacency(Vector2 checkingPosition)
+    {
+        if (checkingPosition.x == 0)
+        {
+            if (checkingPosition.y == 1 || checkingPosition.y == -1)
+                return true;
+            return false;
+        }
+        else if (checkingPosition.x == 1)
+        {
+            if (checkingPosition.y == 0 || checkingPosition.y == -1)
+                return true;
+            return false;
+        }
+        if (checkingPosition.x == -1)
+        {
+            if (checkingPosition.y == 0 || checkingPosition.y == 1)
+                return true;
+            return false;
+        }
+        return false;
+    }
+
+    public static bool checkValidAdjacency(List<Vector2> checkingPositions)
+    {
+        for (int i = 0; i < checkingPositions.Count; i++)
+        {
+            if (!checkValidAdjacency(checkingPositions[i]))
+                return false;
+        }
+        return true;
+    }
+
+    public static AbsoluteDirection relativeToAbsoluteDirection(AbsoluteDirection currentDirection, RelativeDirection relativeDirection)
+    {
+        int currentDirIdx = (int)currentDirection;
+        int relativeDirIdx = (int)relativeDirection;
+
+        currentDirIdx += relativeDirIdx;
+
+        if (currentDirIdx >= 6)
+        {
+            currentDirIdx -= 6;
+        }
+
+        return (AbsoluteDirection)(currentDirIdx);
+    }
+
+    public static AbsoluteDirection relativePosToAbsoluteDirection(Vector2 relativePosition)
+    {
+        if (relativePosition.x == 0)
+        {
+            if (relativePosition.y == 1)
+            {
+                return AbsoluteDirection.UP;
+            }
+            if (relativePosition.y == -1)
+            {
+                return AbsoluteDirection.DOWN;
+            }
+        }
+        else if (relativePosition.x == 1)
+        {
+            if (relativePosition.y == 0)
+            {
+                return AbsoluteDirection.UP_RIGHT;
+            }
+            if (relativePosition.y == -1)
+            {
+                return AbsoluteDirection.DOWN_RIGHT;
+            }
+        }
+        else if (relativePosition.x == -1)
+        {
+            if (relativePosition.y == 0)
+            {
+                return AbsoluteDirection.DOWN_LEFT;
+            }
+            if (relativePosition.y == 1)
+            {
+                return AbsoluteDirection.UP_LEFT;
+            }
+        }
+        throw new UnityException("hex coord: (" + relativePosition + ") is not an adjacent/relative coord");
+    }
+
+    public static Vector2 rotationDirectionToRelativePos(AbsoluteDirection rot)
+    {
+        return rotationDirectionToObject(rot).getUpDirection();
+    }
+
+    public static RotationDirectionObject rotationDirectionToObject(AbsoluteDirection rot)
+    {
+        switch (rot)
+        {
+            case AbsoluteDirection.UP:
+                return RotationDirectionObject.UP;
+
+            case AbsoluteDirection.UP_RIGHT:
+                return RotationDirectionObject.UP_RIGHT;
+
+            case AbsoluteDirection.DOWN_RIGHT:
+                return RotationDirectionObject.DOWN_RIGHT;
+
+            case AbsoluteDirection.DOWN:
+                return RotationDirectionObject.DOWN;
+
+            case AbsoluteDirection.DOWN_LEFT:
+                return RotationDirectionObject.DOWN_LEFT;
+
+            case AbsoluteDirection.UP_LEFT:
+                return RotationDirectionObject.UP_LEFT;
+        }
+
+        return null;
+    }
+
+    public static Vector2 rotate(Vector2 originalRelativeLocation, AbsoluteDirection rotationTo)
+    {
+        RotationDirectionObject rotDirObj = rotationDirectionToObject(rotationTo);
+
+        return rotDirObj.getUpDirection() * originalRelativeLocation.y + rotDirObj.getRightDirection() * originalRelativeLocation.x;
+    }
 }

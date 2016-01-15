@@ -2,58 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-//Helps store information usefully for hex-tile rotations
-public class RotationDirectionObject
-{
-    public static RotationDirectionObject UP = new RotationDirectionObject(new Vector2(0, 1), new Vector2(1, 0));
-    public static RotationDirectionObject UP_RIGHT = new RotationDirectionObject(new Vector2(1, 0), new Vector2(1, -1));
-    public static RotationDirectionObject DOWN_RIGHT = new RotationDirectionObject(new Vector2(1, -1), new Vector2(0, -1));
-    public static RotationDirectionObject DOWN = new RotationDirectionObject(new Vector2(0, -1), new Vector2(-1, 0));
-    public static RotationDirectionObject DOWN_LEFT = new RotationDirectionObject(new Vector2(-1, 0), new Vector2(-1, 1));
-    public static RotationDirectionObject UP_LEFT = new RotationDirectionObject(new Vector2(-1, 1), new Vector2(0, 1));
-    
-    private Vector2 upDirection;
-    private Vector2 rightDirection;
-
-    private RotationDirectionObject(Vector2 upDir, Vector2 rightDir)
-    {
-        upDirection = upDir;
-        rightDirection = rightDir;
-    }
-
-    public Vector2 getUpDirection()
-    {
-        return upDirection;
-    }
-
-    public Vector2 getRightDirection()
-    {
-        return rightDirection;
-    }
-};
-
-//Relative
-public enum RelativeDirection
-{
-    FORWARD,
-    FORWARD_RIGHT,
-    BACKWARD_RIGHT,
-    BACKWARD,
-    BACKWARD_LEFT,
-    FORWARD_LEFT
-};
-
-//Absolute
-public enum AbsoluteDirection
-{
-    UP,
-    UP_RIGHT,
-    DOWN_RIGHT,
-    DOWN,
-    DOWN_LEFT,
-    UP_LEFT
-};
-
 public enum InteractionStates
 {
     SelectingKingLocation,
@@ -65,52 +13,6 @@ public enum InteractionStates
     SelectingUnitRotation
 };
 
-
-public enum MovementTypes
-{
-    Jump
-};
-
-
-public class MovementTypeParent
-{
-    //This is just to serve as a parent so we can stored all childern of this parent in one place... so far I cant think of anything MovementTypeParent should have
-};
-
-
-public class JumpMoveType : MovementTypeParent
-{
-    public List<Vector2> jumpPositions = new List<Vector2>();
-
-    public void initialize(List<Vector2> jumpMovementPositions)
-    {
-        jumpPositions = jumpMovementPositions;
-    }
-};
-
-
-public class SlideMoveType : MovementTypeParent
-{
-    public List<Vector2> directions = new List<Vector2>();
-    public int range = -1; //-1 for infinite range
-
-    public void initialize(List<Vector2> slideDirections, int slideRange = -1)
-    {
-        directions = slideDirections;
-        range = slideRange;
-    }
-}
-
-public struct UnitInfo
-{
-    public string unitName;
-    public string baseSpriteName;
-    public string colorsSpriteName;
-    public MovementTypes movementType;
-    public MovementTypeParent movementObject;
-    public List<RelativeDirection> relativeRotationDirections;
-    public bool rotationEnabled;
-};
 
 
 public class GameControllerScript : MonoBehaviour
@@ -129,14 +31,18 @@ public class GameControllerScript : MonoBehaviour
 
     private Dictionary<string, UnitInfo> unitInfoDictionary = new Dictionary<string, UnitInfo>();
 
-    private List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
+    //private List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
+
+    private float rightClickTimeCache;
+
+    //Counter for alternating movements
+    public int altCounter = 0;
 
     private Color[] teamColorList = 
     {
         new Color(0.0f, 0.0f, 1.0f),
         new Color(1.0f, 0.0f, 0.0f)
     };
-    
 
 
     public Color getTeamColor(uint teamNum = 0)
@@ -148,6 +54,30 @@ public class GameControllerScript : MonoBehaviour
         return teamColorList[teamNum];
     }
 
+
+    public UnitScript getSelectedUnit()
+    {
+        return selectedUnit;
+    }
+
+
+    public SpawnTiles getTileController()
+    {
+        return tileControllerScript;
+    }
+
+
+    public uint getCurrentTeam()
+    {
+        return currentTeam;
+    }
+
+
+    //Helper for non-MonoDevelopment scripts print stuff / such as MovementObjects :D
+    public void printString(string str)
+    {
+        print(str);
+    }
 
 
     public void addNewUnitInfo(UnitInfo info)
@@ -185,70 +115,11 @@ public class GameControllerScript : MonoBehaviour
     void Start()
     {
 
-        UnitInfo newUnitInfo = new UnitInfo();
+        MovementTypeParent.setGameControllerRef(this);
 
-        newUnitInfo.unitName = "King";
-        newUnitInfo.baseSpriteName = "King_Base";
-        newUnitInfo.colorsSpriteName = "King_Colors";
-        List<Vector2> jumpPositions = new List<Vector2>();
-        jumpPositions.Add(new Vector2(0, -1));
-        jumpPositions.Add(new Vector2(1, -1));
-        jumpPositions.Add(new Vector2(1, 0));
-        jumpPositions.Add(new Vector2(0, 1));
-        jumpPositions.Add(new Vector2(-1, 1));
-        jumpPositions.Add(new Vector2(-1, 0));
-        List<RelativeDirection> relativeRotations = new List<RelativeDirection>();
-        newUnitInfo.relativeRotationDirections = relativeRotations;
-        JumpMoveType jumpMove = new JumpMoveType();
-        jumpMove.initialize(jumpPositions);
-        newUnitInfo.movementObject = jumpMove;
-        newUnitInfo.rotationEnabled = false;
-        tempUnitInfos.Add(newUnitInfo);
 
-        newUnitInfo.unitName = "BasicUnit";
-        newUnitInfo.baseSpriteName = "BasicUnit_Base";
-        newUnitInfo.colorsSpriteName = "BasicUnit_Colors";
-        jumpPositions = new List<Vector2>();
-        //jumpPositions.Add(new Vector2(2, -1));
-        jumpPositions.Add(new Vector2(0, 2));
-        //jumpPositions.Add(new Vector2(0, -2));
-        //jumpPositions.Add(new Vector2(-2, 1));
-        relativeRotations = new List<RelativeDirection>();
-        relativeRotations.Add(RelativeDirection.FORWARD_RIGHT);
-        relativeRotations.Add(RelativeDirection.FORWARD_LEFT);
-        newUnitInfo.relativeRotationDirections = relativeRotations;
-        jumpMove = new JumpMoveType();
-        jumpMove.initialize(jumpPositions);
-        newUnitInfo.movementObject = jumpMove;
-        newUnitInfo.rotationEnabled = true;
-        tempUnitInfos.Add(newUnitInfo);
+        TempUnitInfos.constructTempUnitInfos();
 
-        //newUnitInfo.unitName = "SpecialUnit";
-
-        newUnitInfo.unitName = "SpecialUnit";
-        newUnitInfo.baseSpriteName = "SpecialUnit_Base";
-        newUnitInfo.colorsSpriteName = "SpecialUnit_Colors";
-        jumpPositions = new List<Vector2>();
-        jumpPositions.Add(new Vector2(0, 1));
-        jumpPositions.Add(new Vector2(0, 2));/*
-        jumpPositions.Add(new Vector2(-1, 0));
-        jumpPositions.Add(new Vector2(-2, 0));
-        jumpPositions.Add(new Vector2(1, -1));
-        jumpPositions.Add(new Vector2(2, -2));
-        jumpPositions.Add(new Vector2(-1, 1));
-        jumpPositions.Add(new Vector2(-2, 2));*/
-        relativeRotations = new List<RelativeDirection>();
-        relativeRotations.Add(RelativeDirection.FORWARD_RIGHT);
-        relativeRotations.Add(RelativeDirection.FORWARD_LEFT);
-        relativeRotations.Add(RelativeDirection.BACKWARD_LEFT);
-        relativeRotations.Add(RelativeDirection.BACKWARD_RIGHT);
-        relativeRotations.Add(RelativeDirection.BACKWARD);
-        newUnitInfo.relativeRotationDirections = relativeRotations;
-        jumpMove = new JumpMoveType();
-        jumpMove.initialize(jumpPositions);
-        newUnitInfo.movementObject = jumpMove;
-        newUnitInfo.rotationEnabled = true;
-        tempUnitInfos.Add(newUnitInfo);
 
         bool foundTileController = false;
         bool foundSpriteManager = false;
@@ -287,10 +158,11 @@ public class GameControllerScript : MonoBehaviour
 
 
         //Adding all the unit data to dictionary
-        for (int i = 0; i < tempUnitInfos.Count; i++ )
+        for (int i = 0; i < TempUnitInfos.getTempUnitInfos().Count; i++ )
         {
-            addNewUnitInfo(tempUnitInfos[i]);
+            addNewUnitInfo(TempUnitInfos.getTempUnitInfos()[i]);
         }
+
 
         enableInteraction();
         switchInteractionState(InteractionStates.SelectingKingLocation);
@@ -327,20 +199,27 @@ public class GameControllerScript : MonoBehaviour
             }
             if (Input.GetButtonDown("Fire2"))
             {
-                if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
+                float diff = Time.time - rightClickTimeCache;
+
+                if (diff <= 0.20)
                 {
-                    switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    }
+
+                    if (interactionState == InteractionStates.SelectingUnitMovement)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    }
+
+                    if (interactionState == InteractionStates.SelectingUnitRotation)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToRotate);
+                    }
                 }
 
-                if (interactionState == InteractionStates.SelectingUnitMovement)
-                {
-                    switchInteractionState(InteractionStates.SelectingUnitToMove);
-                }
-
-                if (interactionState == InteractionStates.SelectingUnitRotation)
-                {
-                    switchInteractionState(InteractionStates.SelectingUnitToRotate);
-                }
+                rightClickTimeCache = Time.time;
             }
             if (Input.GetButtonDown("Jump"))
             {
@@ -351,6 +230,19 @@ public class GameControllerScript : MonoBehaviour
                 if (interactionState == InteractionStates.SelectingUnitRotation || interactionState == InteractionStates.SelectingUnitToRotate)
                 {
                     switchToNextTeam();
+                }
+            }
+            if (Input.GetButtonDown("Alt"))
+            {
+                if (interactionState == InteractionStates.SelectingUnitMovement)
+                {
+                    altCounter++;
+                    if (altCounter >= selectedUnit.getUnitInfo().movementObjects.Count)
+                    {
+                        altCounter = 0;
+                    }
+
+                    switchInteractionState(InteractionStates.SelectingUnitMovement);
                 }
             }
         }
@@ -410,7 +302,7 @@ public class GameControllerScript : MonoBehaviour
     // ****** Switch Interaction States ****** //
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    void switchInteractionState(InteractionStates state)
+    public void switchInteractionState(InteractionStates state)
     {
         //Ending Previous State
         switch (interactionState)
@@ -422,6 +314,11 @@ public class GameControllerScript : MonoBehaviour
             case InteractionStates.SelectingUnitRotation:
                 endSelectingUnitRotation();
                 break;
+
+            case InteractionStates.SelectingUnitMovement:
+                endSelectingUnitMovement(state);
+                break;
+
         }
 
         //Starting Next State
@@ -595,49 +492,8 @@ public class GameControllerScript : MonoBehaviour
 
         selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
 
-        switch (selectedUnit.getUnitInfo().movementType)
-        {
-            case MovementTypes.Jump:
-
-                List<Vector2> jumpPositions = ((JumpMoveType)selectedUnit.getUnitInfo().movementObject).jumpPositions;
-
-
-                List<Vector2> adjustedJumpPositions = new List<Vector2>();
-                for (int i = 0; i < jumpPositions.Count; i++ )
-                {
-                    adjustedJumpPositions.Add(rotate(jumpPositions[i], selectedUnit.getRotation()));
-                }
-
-
-                // !!! Will need to account for ROTATION !!!
-
-                for (int i = 0; i < adjustedJumpPositions.Count; i++)
-                {
-                    if (adjustedJumpPositions[i].x == 0 && adjustedJumpPositions[i].y == 0)
-                    {
-                        print("Warning!  Included a jump position that is the same location as the unit relative hex coord of (0,0) ignoring, please remove for optimization");
-                        continue;
-                    }
-
-                    HexTile tile = tileControllerScript.getTileFromHexCoord(adjustedJumpPositions[i] + selectedUnit.getOccupyingHex().getCoords());
-
-                    if (tile != null)
-                    {
-                        if (tile.getOccupyingUnit() != null)
-                        {
-                            if (tile.getOccupyingUnit().getTeam() != currentTeam)
-                            {
-                                tile.switchState(TileState.ATTACKABLE);
-                            }
-                        }
-                        else
-                        {
-                            tile.switchState(TileState.SELECTABLE);
-                        }
-                    }
-                }
-                break;
-        }
+        //selectedUnit.getUnitInfo().movementObject.startSelectingInMode(selectedUnit, currentTeam);
+        selectedUnit.getUnitInfo().movementObjects[altCounter].startSelectingInMode(selectedUnit, currentTeam);
     }
 
 
@@ -688,10 +544,10 @@ public class GameControllerScript : MonoBehaviour
 
         for (int i = 0; i < relativeDirections.Count; i++)
         {
-            AbsoluteDirection rotationDirection = relativeToAbsoluteDirection(selectedUnit.getRotation(), relativeDirections[i]);
+            AbsoluteDirection rotationDirection = SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), relativeDirections[i]);
             
             //Creating Temp Tiles if any just incase
-            Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + rotationDirectionToRelativePos(rotationDirection);
+            Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotationDirectionToRelativePos(rotationDirection);
             tileControllerScript.addNewTempTile(hexCoord);
 
             HexTile tile = tileControllerScript.getTileFromHexCoord(hexCoord, true);
@@ -768,8 +624,14 @@ public class GameControllerScript : MonoBehaviour
                         unitScript.initialize(newKingInfo);
 
                         //unitScript.setMovePositions(newKingInfo.movements);
-                        unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.baseSpriteName);
-                        unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.colorsSpriteName);
+                        if (newKingInfo.baseSpriteName != null)
+                        {
+                            unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.baseSpriteName);
+                        }
+                        if (newKingInfo.colorsSpriteName != null)
+                        {
+                            unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.colorsSpriteName);
+                        } 
                         unitScript.getColorsSpriteRenderer().color = getTeamColor(currentTeam);
 
                         //unitScript.setMovePositions(rm2);
@@ -813,7 +675,10 @@ public class GameControllerScript : MonoBehaviour
                         string[] tempSpawnList = 
                         {
                             "BasicUnit",
-                            "SpecialUnit"
+                            "SpecialUnit",
+                            "KnightUnit",
+                            "NormalUnit",
+                            "RangedUnit"
                         };
 
                         GameObject spawningUnit = (GameObject)Instantiate(tileControllerScript.spawnUnitType, tileControllerScript.hexCoordToPixelCoord(clickedTile.getCoords()), Quaternion.identity);
@@ -825,8 +690,14 @@ public class GameControllerScript : MonoBehaviour
 
                         unitScript.initialize(newUnitInfo);
 
-                        unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.baseSpriteName);
-                        unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.colorsSpriteName);
+                        if (newUnitInfo.baseSpriteName != null)
+                        {
+                            unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.baseSpriteName);
+                        }
+                        if (newUnitInfo.colorsSpriteName != null)
+                        {
+                            unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.colorsSpriteName);
+                        }
                         unitScript.getColorsSpriteRenderer().color = getTeamColor(currentTeam);
                         //unitScript.setMovePositions(newUnitInfo.movements);
                         unitScript.setTeam(currentTeam);
@@ -854,7 +725,7 @@ public class GameControllerScript : MonoBehaviour
         {
             Vector2 relPosOfClicked = clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords();
 
-            selectedUnit.setRotationDirection(relativePosToAbsoluteDirection(relPosOfClicked));
+            selectedUnit.setRotationDirection(SpawnTiles.relativePosToAbsoluteDirection(relPosOfClicked));
 
             switchInteractionState(InteractionStates.SelectingUnitToMove);
         }
@@ -875,43 +746,19 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit Movement
     void selectingUnitMovement(HexTile clickedTile)
     {
-        UnitInfo selectedUnitInfo = selectedUnit.getUnitInfo();
-        MovementTypeParent movementObject = selectedUnitInfo.movementObject;
         if (clickedTile.getCurrentTileState() == TileState.SELECTABLE || clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            switch (selectedUnitInfo.movementType)
-            {
-                case MovementTypes.Jump:
+            //selectedUnit.getUnitInfo().movementObject.clickedInMode(clickedTile, selectedUnit, currentTeam);
+            selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
 
-                    if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
-                    {
-                        if (clickedTile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-                        {
-                            clickedTile.getOccupyingUnit().destroyUnit();
-                            clickedTile.setOccupyingUnit(null);
-                            print("King Destroyed");
-                            Application.Quit();
-                        }
-                        else
-                        {
-                            clickedTile.getOccupyingUnit().destroyUnit();
-                            clickedTile.setOccupyingUnit(null);
-                            print("Unit Destroyed");
-                        }
-                    }
-
-                    tileControllerScript.transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-                    selectedUnit.transform.position = tileControllerScript.hexCoordToPixelCoord(clickedTile.getCoords());
-                    //switchToNextTeam();
-
-                    switchInteractionState(InteractionStates.SelectingUnitToRotate);
-                    
-                    break;
-            }
         }
-        else if (clickedTile.getOccupyingUnit() != null)
+        else if (clickedTile.getOccupyingUnit())
         {
-            if (clickedTile.getOccupyingUnit().getTeam() == currentTeam)
+            if (selectedUnit == clickedTile.getOccupyingUnit())
+            {
+                switchInteractionState(InteractionStates.SelectingUnitToMove);
+            }
+            else if (clickedTile.getOccupyingUnit().getTeam() == currentTeam)
             {
                 selectedUnit = clickedTile.getOccupyingUnit();
                 switchInteractionState(InteractionStates.SelectingUnitMovement);
@@ -935,9 +782,16 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit Rotation
     void selectingUnitRotation(HexTile clickedTile)
     {
-        if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        if (clickedTile.getOccupyingUnit())
         {
-            selectedUnit.setRotationDirection(relativePosToAbsoluteDirection(clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords()));
+            if (selectedUnit == clickedTile.getOccupyingUnit())
+            {
+                switchInteractionState(InteractionStates.SelectingUnitToRotate);
+            }
+        }
+        else if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        {
+            selectedUnit.setRotationDirection(SpawnTiles.relativePosToAbsoluteDirection(clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords()));
 
             switchToNextTeam();
         }
@@ -960,172 +814,17 @@ public class GameControllerScript : MonoBehaviour
         tileControllerScript.clearAllTempTiles();
     }
 
+// -- End Selecting Unit Movement
+    void endSelectingUnitMovement(InteractionStates nextInteractionState)
+    {
+        if (nextInteractionState != InteractionStates.SelectingUnitMovement)
+        {
+            altCounter = 0;
+        }
+    }
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------//
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-    AbsoluteDirection relativeToAbsoluteDirection(AbsoluteDirection currentDirection, RelativeDirection relativeDirection)
-    {
-        int currentDirIdx = (int)currentDirection;
-        int relativeDirIdx = (int)relativeDirection;
-
-        currentDirIdx += relativeDirIdx;
-
-        if (currentDirIdx >= 6)
-        {
-            currentDirIdx -= 6;
-        }
-
-        return (AbsoluteDirection)(currentDirIdx);
-    }
-
-
-
-    /*AbsoluteDirection brelativeDirectionToRotationDirection(AbsoluteDirection currentDirection, RelativeDirection relativeDesinationDirection)
-    {
-        AbsoluteDirection[] rotationsList = 
-        {
-            AbsoluteDirection.UP,
-            AbsoluteDirection.UP_RIGHT,
-            AbsoluteDirection.DOWN_RIGHT,
-            AbsoluteDirection.DOWN,
-            AbsoluteDirection.DOWN_LEFT,
-            AbsoluteDirection.UP_LEFT
-        };
-
-        int listPosDisplacement = 0;
-        
-        switch (relativeDesinationDirection)
-        {
-            case RelativeDirection.FORWARD_RIGHT:
-                listPosDisplacement = 1;
-                break;
-            
-            case RelativeDirection.BACKWARD_RIGHT:
-                listPosDisplacement = 2;
-                break;
-
-            case RelativeDirection.BACKWARD:
-                listPosDisplacement = 3;
-                break;
-
-            case RelativeDirection.BACKWARD_LEFT:
-                listPosDisplacement = 4;
-                break;
-
-            case RelativeDirection.FORWARD_LEFT:
-                listPosDisplacement = 5;
-                break;
-        }
-
-        int initialListPosition = 0;
-        //Need to find list position of currentDirection
-        for (int i = 0; i < rotationsList.Length; i++)
-        {
-            if (rotationsList[i] == currentDirection)
-            {
-                initialListPosition = i;
-                break;
-            }
-        }
-
-        listPosDisplacement += initialListPosition;
-        
-        if (listPosDisplacement >= 6)
-        {
-            listPosDisplacement -= 6;
-        }
-
-        return rotationsList[listPosDisplacement];
-
-    }*/
-
-
-
-    AbsoluteDirection relativePosToAbsoluteDirection(Vector2 relativePosition)
-    {
-        if (relativePosition.x == 0)
-        {
-            if (relativePosition.y == 1)
-            {
-                return AbsoluteDirection.UP;
-            }
-            if (relativePosition.y == -1)
-            {
-                return AbsoluteDirection.DOWN;
-            }
-        }
-        else if (relativePosition.x == 1)
-        {
-            if (relativePosition.y == 0)
-            {
-                return AbsoluteDirection.UP_RIGHT;
-            }
-            if (relativePosition.y == -1)
-            {
-                return AbsoluteDirection.DOWN_RIGHT;
-            }
-        }
-        else if (relativePosition.x == -1)
-        {
-            if (relativePosition.y == 0)
-            {
-                return AbsoluteDirection.DOWN_LEFT;
-            }
-            if (relativePosition.y == 1)
-            {
-                return AbsoluteDirection.UP_LEFT;
-            }
-        }
-        throw new UnityException("hex coord: (" + relativePosition + ") is not an adjacent/relative coord");
-    }
-
-
-    Vector2 rotationDirectionToRelativePos(AbsoluteDirection rot)
-    {
-        return rotationDirectionToObject(rot).getUpDirection();
-    }
-
-
-    RotationDirectionObject rotationDirectionToObject(AbsoluteDirection rot)
-    {
-        switch (rot)
-        {
-            case AbsoluteDirection.UP:
-                return RotationDirectionObject.UP;
-
-            case AbsoluteDirection.UP_RIGHT:
-                return RotationDirectionObject.UP_RIGHT;
-
-            case AbsoluteDirection.DOWN_RIGHT:
-                return RotationDirectionObject.DOWN_RIGHT;
-
-            case AbsoluteDirection.DOWN:
-                return RotationDirectionObject.DOWN;
-
-            case AbsoluteDirection.DOWN_LEFT:
-                return RotationDirectionObject.DOWN_LEFT;
-
-            case AbsoluteDirection.UP_LEFT:
-                return RotationDirectionObject.UP_LEFT;
-        }
-
-        return null;
-    }
-
-
-    //Note pass in the value for units as the original positions of the tile and not a previously rotated version
-    Vector2 rotate(Vector2 originalRelativeLocation, AbsoluteDirection rotationTo)
-    {
-        RotationDirectionObject rotDirObj = rotationDirectionToObject(rotationTo);
-
-        return rotDirObj.getUpDirection() * originalRelativeLocation.y + rotDirObj.getRightDirection() * originalRelativeLocation.x;
-    }
-
 
 };

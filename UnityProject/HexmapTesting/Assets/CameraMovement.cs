@@ -9,6 +9,8 @@ public class CameraMovement : MonoBehaviour {
 
     public bool RightMouseButtonHeldDown = false;
 
+    public Vector3 prevMousePosition = new Vector3(0, 0, 0);
+
 	// Update is called once per frame
 	void Update () 
     {
@@ -18,9 +20,13 @@ public class CameraMovement : MonoBehaviour {
         // Mouse  Stuff thats wierd
         if (RightMouseButtonHeldDown)
         {
-            direction += hDirection * Input.GetAxisRaw("Mouse X") + vDirection * Input.GetAxisRaw("Mouse Y");
+            Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) - prevMousePosition;
+            transform.position += (Vector3)(hDirection * -mousePos.x + vDirection * -mousePos.y);
+            //transform.position += (Vector3)(hDirection * -Input.GetAxisRaw("Mouse X") + vDirection * -Input.GetAxisRaw("Mouse Y"));
         }
-        
+
+        prevMousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
         if (direction != Vector2.zero)
         {
             direction.Normalize();
