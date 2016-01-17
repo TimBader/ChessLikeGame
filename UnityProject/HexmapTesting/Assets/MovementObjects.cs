@@ -24,9 +24,11 @@ public abstract class MovementTypeParent
         gameControllerRef = gameControllerScriptRef;
     }
 
-    public abstract void startSelectingInMode(UnitScript selectedUnit, uint currentTeam);
+    public abstract void startSelectingInMode(UnitScript selectedUnit, int currentTeam);
 
-    public abstract void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, uint currentTeam);
+    public abstract void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, int currentTeam);
+
+    public abstract bool canMove(UnitScript selectedUnit, int currentTeam);
 
     public static bool testForInvalidPositions(List<Vector2> positionsList)
     {
@@ -93,7 +95,7 @@ public class NormalMoveType : MovementTypeParent
     }
 
 
-    public override void startSelectingInMode(UnitScript selectedUnit, uint currentTeam)
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
         List<List<Vector2>> adjustedMoveLocs = new List<List<Vector2>>();
         List<List<Vector2>> adjustedBlockingLocs = new List<List<Vector2>>();
@@ -157,7 +159,7 @@ public class NormalMoveType : MovementTypeParent
     }
 
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, uint currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
@@ -183,6 +185,61 @@ public class NormalMoveType : MovementTypeParent
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < moveLocations.Count; i++)
+        {
+            //Check normal location (optimizaiton)
+            bool good = false;
+            HexTile tile = null;
+            for (int j = 0; j < moveLocations[i].Count; j++)
+            {
+                tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(moveLocations[i][j], selectedUnit.getRotation()));
+                if (tile)
+                {
+                    if (tile.getOccupyingUnit())
+                    {
+                        if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                        {
+                            good = true;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        good = true;
+                        break;
+                    }
+                }
+            }
+            if (good)
+            {
+                for (int j = 0; j < blockingLocations[i].Count; j++)
+                {
+                    tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(blockingLocations[i][j], selectedUnit.getRotation()));
+                    if (tile)
+                    {
+                        if (tile.getOccupyingUnit())
+                        {
+                            good = false;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+            }
+            if (good)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
 
@@ -206,7 +263,7 @@ public class JumpMoveType : MovementTypeParent
     }
 
 
-    public override void startSelectingInMode(UnitScript selectedUnit, uint currentTeam)
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
         List<Vector2> adjustedJumpPositions = new List<Vector2>();
         for (int i = 0; i < jumpPositions.Count; i++)
@@ -236,7 +293,7 @@ public class JumpMoveType : MovementTypeParent
     }
 
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, uint currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
@@ -259,6 +316,29 @@ public class JumpMoveType : MovementTypeParent
         selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+    }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < jumpPositions.Count; i++ )
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(jumpPositions[i], selectedUnit.getRotation()));
+            if (tile)
+            {
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;                        
+                }
+           }
+        }
+        return false;
     }
 };
 
@@ -295,7 +375,7 @@ public class SlideMoveType : MovementTypeParent
         movementType = MovementTypes.Slide;
     }
 
-    public override void startSelectingInMode(UnitScript selectedUnit, uint currentTeam)
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
         List<Vector2> adjustedDirections = new List<Vector2>();
         for (int i = 0; i < directions.Count; i++)
@@ -346,7 +426,7 @@ public class SlideMoveType : MovementTypeParent
         }
     }
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, uint currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
@@ -370,6 +450,30 @@ public class SlideMoveType : MovementTypeParent
         //switchToNextTeam();
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+    }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < directions.Count; i++ )
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(directions[i], selectedUnit.getRotation()));
+            if (tile)
+            {
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
 
@@ -423,7 +527,7 @@ public class ChargeMoveType : MovementTypeParent
         movementType = MovementTypes.Charge;
     }
 
-    public override void startSelectingInMode(UnitScript selectedUnit, uint currentTeam)
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
         List<Vector2> adjustedDirs = new List<Vector2>();
 
@@ -506,7 +610,7 @@ public class ChargeMoveType : MovementTypeParent
         }
     }
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, uint currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
         List<HexTile> allTiles = gameControllerRef.getTileController().getAllTiles();
 
@@ -543,6 +647,55 @@ public class ChargeMoveType : MovementTypeParent
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < directions.Count; i++ )
+        {
+            bool good = true;
+            //Plus one since we need to see if the one after the blocking exent is avialiable
+            Vector2 currentDirection = SpawnTiles.rotate(directions[i], selectedUnit.getRotation());
+            HexTile tile = null;
+            //Starts at one since you dont want to check against self :P
+            for (int j = 1; j <= blockingExtent[i]; j++ )
+            {
+                tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + currentDirection * j);
+                if (tile)
+                {
+                    if (tile.getOccupyingUnit())
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+                else
+                {
+                    good = false;
+                    break;
+                }
+            }
+            if (good)
+            {
+                tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + currentDirection * (blockingExtent[i] + 1));
+                if (tile)
+                {
+                    if (tile.getOccupyingUnit())
+                    {
+                        if (tile.getOccupyingUnit().getTeam() == currentTeam)
+                        {
+                            good = false;
+                        }
+                    }
+                }
+            }
+            if (good)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
 
 
@@ -565,7 +718,7 @@ public class RangedMoveType : MovementTypeParent
         movementType = MovementTypes.Ranged;
     }
 
-    public override void startSelectingInMode(UnitScript selectedUnit, uint currentTeam)
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
         List<Vector2> adjustedRelPos = new List<Vector2>();
 
@@ -598,7 +751,7 @@ public class RangedMoveType : MovementTypeParent
         }
     }
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, uint currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, int currentTeam)
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
@@ -618,5 +771,24 @@ public class RangedMoveType : MovementTypeParent
 
             gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
+    }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < relativeLocations.Count; i++ )
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(relativeLocations[i], selectedUnit.getRotation()));
+            if (tile)
+            {
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }

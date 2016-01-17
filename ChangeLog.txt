@@ -1,0 +1,16 @@
+Chess-Like Game Change Log
+------
+
+[ v0.0.1 ]
+Author: Tim Bader (The person to blame for issues)
+- MoveTypes can now figure out whether or not its possible to move (Not quite completely tested)
+- Now can spawn units anytime through nice code function (Allows for easier spawning and testing, showed)
+- Game will end if a team has no units that can move (hard to to test :P without the above)
+
+*Extra Details (Less important changes)
+- Added a new abstract function for MoveTypes that can figure out if they can move or not (canMove);
+- Can no longer click on another unit when selecting movement to switch the selected unit
+- Removed the code that stopped the ability to click a rotate to tile that has a unit on it... dont know how it got there :P
+- Added a new spawnUnit function that can handle spawning units for us... should of had this for a while :D
+- Made SpriteResourceManager use static functions
+- Getting team colors are not stored staticly in TeamControllerScript

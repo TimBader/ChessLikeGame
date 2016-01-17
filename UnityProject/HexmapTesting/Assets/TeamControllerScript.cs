@@ -3,19 +3,23 @@ using System.Collections;
 
 public class TeamControllerScript : MonoBehaviour {
 
-    private uint team = 0;
+    private int team = 0;
     private UnitScript kingRef = null;
 
+    private static Color[] teamColorList = 
+    {
+        new Color(0.0f, 0.0f, 1.0f),
+        new Color(1.0f, 0.0f, 0.0f)
+    };
 
-
-    public void setTeam (uint newTeam = 0)
+    public void setTeam (int newTeam = 0)
     {
         team = newTeam;
     }
 
 
 
-    public uint getTeam()
+    public int getTeam()
     {
         return team;
     }
@@ -32,5 +36,16 @@ public class TeamControllerScript : MonoBehaviour {
     public UnitScript getKing()
     {
         return kingRef;
+    }
+
+
+
+    public static Color getTeamColor(int teamNum = 0)
+    {
+        if (teamNum >= teamColorList.Length)
+        {
+            throw new UnityException("Team " + teamNum + " does not have a team color set");
+        }
+        return teamColorList[teamNum];
     }
 }

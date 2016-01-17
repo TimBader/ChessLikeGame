@@ -12,7 +12,7 @@ public class UnitScript : MonoBehaviour {
 
     private HexTile occupyingHexTile = null;
     //private List<Vector2> movePositions;
-    private uint teamNumber = 0;
+    private int teamNumber = 0;
     private bool garbage = false;
     private UnitType unitType = UnitType.BasicUnit;
 
@@ -28,7 +28,7 @@ public class UnitScript : MonoBehaviour {
         return occupyingHexTile;
     }
 
-    public void initialize(UnitInfo info)
+    public void initialize(UnitInfo info, int team = -1)
     {
         SpriteRenderer[] list = GetComponentsInChildren<SpriteRenderer>();
         if (list.Length != 2)
@@ -38,6 +38,23 @@ public class UnitScript : MonoBehaviour {
         unitInfo = info;
         baseSpriteRenderer = list[0];
         colorsSpriteRenderer = list[1];
+
+        //teamNumber = team;
+
+        if (info.baseSpriteName != null)
+        {
+            getBaseSpriteRenderer().sprite = SpriteResourceManager.loadSprite(info.baseSpriteName);
+        }
+        if (info.colorsSpriteName != null)
+        {
+            getColorsSpriteRenderer().sprite = SpriteResourceManager.loadSprite(info.colorsSpriteName);
+        }
+
+        if (team >= 0)
+        {
+            setTeam(team);
+            //getColorsSpriteRenderer().color = TeamControllerScript.getTeamColor(team);
+        } 
     }
 
 
@@ -93,9 +110,13 @@ public class UnitScript : MonoBehaviour {
 
 
 
-    public void setTeam(uint teamNum)
+    public void setTeam(int teamNum)
     {
         teamNumber = teamNum;
+        if (teamNum >= 0)
+        {
+            getColorsSpriteRenderer().color = TeamControllerScript.getTeamColor(teamNum);
+        } 
         /*if (teamNum == 1)
         {
             GetComponent<SpriteRenderer>().sprite = tempOtherSprite;
@@ -104,7 +125,7 @@ public class UnitScript : MonoBehaviour {
 
 
 
-    public uint getTeam()
+    public int getTeam()
     {
         return teamNumber;
     }
