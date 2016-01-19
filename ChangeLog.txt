@@ -1,6 +1,16 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.2 ]
+Author: Tim Bader
+- Redid the way units are created in code, reduced the number of lines needed but made it slightly more complicated
+- Now move types that can not be used will not show up while cycling through alternate movements
+- Sneakily added a way to stop the unit that just spawned from being able to move until the next turn... took three lines and a global variable with no planning so this might back and bight me :P
+
+*Extra Details
+- Fixed a bug that wouldn't allow units to move if only One of there moves is not moveable
+- Add a few helper functions that can help build List<T> from T[] since arrays are easier and cleaner to build in code
+
 [ v0.0.1 ]
 Author: Tim Bader (The person to blame for issues)
 - MoveTypes can now figure out whether or not its possible to move (Not quite completely tested)

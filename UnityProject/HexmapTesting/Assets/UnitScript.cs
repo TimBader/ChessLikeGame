@@ -28,6 +28,11 @@ public class UnitScript : MonoBehaviour {
         return occupyingHexTile;
     }
 
+    public Vector2 getCoords()
+    {
+        return occupyingHexTile.getCoords();
+    }
+
     public void initialize(UnitInfo info, int team = -1)
     {
         SpriteRenderer[] list = GetComponentsInChildren<SpriteRenderer>();

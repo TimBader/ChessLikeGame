@@ -31,6 +31,8 @@ public class GameControllerScript : MonoBehaviour
 
     private Dictionary<string, UnitInfo> unitInfoDictionary = new Dictionary<string, UnitInfo>();
 
+    private UnitScript justSpawnedUnit = null;
+
     //private List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
 
     private float rightClickTimeCache;
@@ -391,6 +393,8 @@ public class GameControllerScript : MonoBehaviour
     {
         selectedUnit = null;
 
+        justSpawnedUnit = null;
+
         tileControllerScript.switchAllTileStates();
 
         List<HexTile> adjacent = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getKing().getOccupyingHex());
@@ -473,14 +477,14 @@ public class GameControllerScript : MonoBehaviour
         bool atLeastOneCanMove = false;
         for (int i = 0; i < allUnits.Length; i++)
         {
-            if (allUnits[i].getTeam() == currentTeam)
+            if (allUnits[i].getTeam() == currentTeam && allUnits[i] != justSpawnedUnit)
             {
-                bool canMove = true;
+                bool canMove = false;
                 for (int j = 0; j < allUnits[i].getUnitInfo().movementObjects.Count; j++)
                 {
-                    if (!allUnits[i].getUnitInfo().movementObjects[j].canMove(allUnits[i], currentTeam))
+                    if (allUnits[i].getUnitInfo().movementObjects[j].canMove(allUnits[i], currentTeam))
                     {
-                        canMove = false;
+                        canMove = true;
                         break;
                     }
                 }
@@ -515,7 +519,20 @@ public class GameControllerScript : MonoBehaviour
 
         selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
 
-        //selectedUnit.getUnitInfo().movementObject.startSelectingInMode(selectedUnit, currentTeam);
+        //Temporary Alt counter switching
+        for (int i = 0; i < selectedUnit.getUnitInfo().movementObjects.Count; i++)
+        {
+            int iAlt = altCounter + i;
+            if (iAlt >= selectedUnit.getUnitInfo().movementObjects.Count)
+            {
+                iAlt -= selectedUnit.getUnitInfo().movementObjects.Count;
+            }
+            if (selectedUnit.getUnitInfo().movementObjects[i].canMove(selectedUnit, currentTeam))
+            {
+                altCounter = iAlt;
+                break;
+            }
+        }
         selectedUnit.getUnitInfo().movementObjects[altCounter].startSelectingInMode(selectedUnit, currentTeam);
     }
 
@@ -762,6 +779,8 @@ public class GameControllerScript : MonoBehaviour
                         //selectedUnit = unitScript;
 
                         selectedUnit = spawnUnit(tempSpawnList[Random.Range(0, tempSpawnList.Length)], clickedTile, currentTeam);
+
+                        justSpawnedUnit = selectedUnit;
 
                         spawned = true;
                         break;

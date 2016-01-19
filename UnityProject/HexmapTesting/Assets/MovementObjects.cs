@@ -19,6 +19,8 @@ public abstract class MovementTypeParent
 
     protected MovementTypes movementType = MovementTypes.Normal;
 
+    public MovementTypeParent() { }
+
     public static void setGameControllerRef(GameControllerScript gameControllerScriptRef)
     {
         gameControllerRef = gameControllerScriptRef;
@@ -72,6 +74,11 @@ public class NormalMoveType : MovementTypeParent
 {
     public List<List<Vector2>> moveLocations = new List<List<Vector2>>();
     public List<List<Vector2>> blockingLocations = new List<List<Vector2>>();
+
+    public NormalMoveType(List<List<Vector2>> moveLocs, List<List<Vector2>> blockingLocs)
+    {
+        initialize(moveLocs, blockingLocs);
+    }
 
     public void initialize(List<List<Vector2>> moveLocs, List<List<Vector2>> blockingLocs)
     {
@@ -252,6 +259,12 @@ public class JumpMoveType : MovementTypeParent
 {
     public List<Vector2> jumpPositions = new List<Vector2>();
 
+    public JumpMoveType(List<Vector2> jumpMovementPositions)
+    {
+        initialize(jumpMovementPositions);
+    }
+
+
     public void initialize(List<Vector2> jumpMovementPositions)
     {
         if (!testForInvalidPositions(jumpPositions))
@@ -352,6 +365,12 @@ public class SlideMoveType : MovementTypeParent
 {
     public List<Vector2> directions = new List<Vector2>();
     public List<int> ranges = new List<int>(); //-1 for infinite range
+
+    public SlideMoveType(List<Vector2> slideDirections, List<int> slideRanges)
+    {
+        initialize(slideDirections, slideRanges);
+    }
+
 
     public void initialize(List<Vector2> slideDirections, List<int> slideRanges)
     {
@@ -488,6 +507,12 @@ public class ChargeMoveType : MovementTypeParent
     public List<Vector2> directions = new List<Vector2>();
     public List<uint> ranges = new List<uint>(); //-1 for infinite range
     public List<uint> blockingExtent = new List<uint>();
+
+    public ChargeMoveType(List<Vector2> slideDirections, List<uint> slideRanges, List<uint> blockExtent)
+    {
+        initialize(slideDirections, slideRanges, blockExtent);
+    }
+
 
     public void initialize(List<Vector2> slideDirections, List<uint> slideRanges, List<uint> blockExtent)
     {
@@ -707,6 +732,12 @@ public class ChargeMoveType : MovementTypeParent
 public class RangedMoveType : MovementTypeParent
 {
     public List<Vector2> relativeLocations = new List<Vector2>();
+
+    public RangedMoveType(List<Vector2> relativeLocs)
+    {
+        initialize(relativeLocs);
+    }
+
 
     public void initialize(List<Vector2> relativeLocs)
     {

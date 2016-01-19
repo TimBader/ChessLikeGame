@@ -107,6 +107,22 @@ public class HexTile : MonoBehaviour {
 
 
 
+    public int getOccupyingUnitTeam()
+    {
+        return occupyingUnit.getTeam();
+    }
+
+
+    
+    public bool testOccupyingUnitTeam(int otherTeam, bool returnIfNoOccuypingUnit = false)
+    {
+        if (!getOccupyingUnit())
+            return returnIfNoOccuypingUnit;
+        return (occupyingUnit.getTeam() == otherTeam);
+    }
+
+
+
     public void setOccupyingUnit(UnitScript unit)
     {
         occupyingUnit = unit;
