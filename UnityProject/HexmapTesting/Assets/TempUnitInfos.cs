@@ -26,16 +26,6 @@ public class TempUnitInfos
 {
     private static List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
 
-    private static List<T> toList<T>(T[] oList)
-    {
-        List<T> list = new List<T>();
-        for (int i = 0; i < oList.Length; i++)
-        {
-            list.Add(oList[i]);
-        }
-        return list;
-    }
-
     private static Vector2 vec(int x, int y)
     {
         return new Vector2(x, y);
@@ -61,14 +51,14 @@ public class TempUnitInfos
         //JumpMoveType kingJumpMove = new JumpMoveType(toList(new Vector2[]{ vec(0,-1), vec(1,-1), vec(1,0), vec(0,1), vec(-1,1), vec(-1,0)} ));
         //kingJumpMove.initialize(toList(new Vector2[]{ vec(0,-1), vec(1,-1), vec(1,0), vec(0,1), vec(-1,1), vec(-1,0)} ));
         //kingMovementObjects.Add(kingJumpMove);
-        kingInfo.movementObjects = toList(new MovementTypeParent[]
+        kingInfo.movementObjects = Util.toList(new MovementTypeParent[]
         {
             new JumpMoveType
             (
-                toList(new Vector2[]
+                new Vector2[]
                 { 
                     vec(0,-1), vec(1,-1), vec(1,0), vec(0,1), vec(-1,1), vec(-1,0)
-                } )
+                }
             )
         });//kingMovementObjects;
         //kingInfo.movementObject = kingJumpMove;
@@ -99,19 +89,19 @@ public class TempUnitInfos
         basicUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_RIGHT);
         basicUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_LEFT);*/
         //basicUnitInfo.movementObjects = basicUnitMovementObjects;
-        basicUnitInfo.movementObjects = toList(new MovementTypeParent[] 
+        basicUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new JumpMoveType
             (
-                toList(new Vector2[]
+                new Vector2[]
                 { 
                     vec(0,2), vec(1,0), vec(-1,1) 
-                } )
+                }
             ) 
         });
         //basicUnitInfo.movementObject = basicUnitJumpMove;
         basicUnitInfo.rotationEnabled = true;
-        basicUnitInfo.relativeRotationDirections = toList(new RelativeDirection[] 
+        basicUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
         {
             RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT 
         });
@@ -140,18 +130,21 @@ public class TempUnitInfos
         jumpPos.Add(new Vector2(-1, 1));*/
         //rangedUnitJumpMoveType.initialize(toList(new Vector2[]{ vec(0,1), vec(1,0), vec(-1,1) }));
         //rangedUnitMovementObjects.Add(rangedUnitJumpMoveType);
-        rangedUnitInfo.movementObjects = toList(new MovementTypeParent[] 
+        rangedUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new RangedMoveType
             (
-                toList(new Vector2[] 
+                new Vector2[] 
                 { 
                     vec(0, 3) 
-                })), 
-                new JumpMoveType(toList(new Vector2[]
+                }
+            ), 
+            new JumpMoveType
+            (
+                new Vector2[]
                 { 
                     vec(0, 1), vec(0,-1)
-                })
+                }
             )
         });
         //rangedUnitInfo.movementType = MovementTypes.Ranged;
@@ -163,7 +156,7 @@ public class TempUnitInfos
         rangedUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD_RIGHT);
         rangedUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD);*/
         rangedUnitInfo.rotationEnabled = true;
-        rangedUnitInfo.relativeRotationDirections = toList(new RelativeDirection[]
+        rangedUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[]
         { 
             RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT, RelativeDirection.BACKWARD
         });
@@ -185,18 +178,18 @@ public class TempUnitInfos
         //slideMove.initialize(toList(new Vector2[]{ RotationDirectionObject.UP.getUpDirection() }), toList(new int[]{ 3 } ));
         //specialUnitMovementObjects.Add(slideMove);
         //specialUnitInfo.movementObjects = specialUnitMovementObjects;
-        specialUnitInfo.movementObjects = toList(new MovementTypeParent[] 
+        specialUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new SlideMoveType
             ( 
-                toList( new Vector2[] 
+                new Vector2[] 
                 { 
                     RotationDirectionObject.UP.getUpDirection() 
-                }), 
-                toList(new int[] 
+                }, 
+                new int[] 
                 { 
                     3 
-                })
+                }
             ) 
         });
         //specialUnitInfo.movementObject = slideMove;
@@ -208,7 +201,7 @@ public class TempUnitInfos
         specialUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD_RIGHT);
         specialUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD);*/
         specialUnitInfo.rotationEnabled = true;
-        specialUnitInfo.relativeRotationDirections = toList(new RelativeDirection[] 
+        specialUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
         { 
             RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT, RelativeDirection.BACKWARD 
         });
@@ -232,36 +225,36 @@ public class TempUnitInfos
         //knightUnitMovementObjects.Add(knightUnitChargeMoveType);
         //knightUnitInfo.movementType = MovementTypes.Charge;
         //knightUnitInfo.movementObject = knightUnitChargeMoveType;
-        knightUnitInfo.movementObjects = toList(new MovementTypeParent[] 
+        knightUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new ChargeMoveType
             (
-                toList(new Vector2[] 
+                new Vector2[] 
                 { 
                     RotationDirectionObject.UP.getUpDirection() 
-                }), 
-                toList(new uint[] 
+                }, 
+                new uint[] 
                 { 
                     5 
-                }), 
-                toList(new uint[] 
+                }, 
+                new uint[] 
                 { 
                     1 
-                })
+                }
             ),
             new JumpMoveType
             (
-                toList(new Vector2[]
+                new Vector2[]
                 {
                     vec(1,0), vec(-1,1)
-                })
+                }
             )
         });
         /*knightUnitInfo.relativeRotationDirections = new List<RelativeDirection>();
         knightUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_RIGHT);
         knightUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_LEFT);*/
-        knightUnitInfo.rotationEnabled = true;        
-        knightUnitInfo.relativeRotationDirections = toList( new RelativeDirection[]
+        knightUnitInfo.rotationEnabled = true;
+        knightUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[]
         { 
             RelativeDirection.FORWARD_LEFT, RelativeDirection.FORWARD_RIGHT 
         } );
@@ -300,39 +293,39 @@ public class TempUnitInfos
         //normalUnitMovementObjects.Add(normalUnitNormalMove);
         //normalUnitMovementObjects.Add(normalUnitJumpMove);
 
-        normalUnitInfo.movementObjects = toList(new MovementTypeParent[] 
+        normalUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new NormalMoveType
             (
-                new List<List<Vector2>> 
+                new Vector2[][] 
                 { 
-                    toList(new Vector2[] 
+                    new Vector2[] 
                     { 
                         vec(1, 2) 
-                    }), 
-                    toList(new Vector2[] 
+                    }, 
+                    new Vector2[] 
                     { 
                         vec(-1, 3) 
-                    }) 
+                    }
                 }, 
-                new List<List<Vector2>> 
+                new Vector2[][] 
                 { 
-                    toList(new Vector2[] 
+                    new Vector2[] 
                     { 
                         vec(1, 0), vec(1, 1) 
-                    }), 
-                    toList(new Vector2[] 
+                    }, 
+                    new Vector2[] 
                     { 
                         vec(-1, 1), vec(-1, 2) 
-                    }) 
+                    } 
                 }
             ), 
             new JumpMoveType
             (
-                toList(new Vector2[] 
+                new Vector2[] 
                 { 
                     vec(0, 1), vec(0, -1) 
-                })
+                }
             ) 
         });
 
@@ -344,8 +337,8 @@ public class TempUnitInfos
         normalUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_LEFT);
         normalUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD_LEFT);
         normalUnitInfo.relativeRotationDirections.Add(RelativeDirection.BACKWARD_RIGHT);*/
-        normalUnitInfo.rotationEnabled = true;        
-        normalUnitInfo.relativeRotationDirections = toList(new RelativeDirection[] 
+        normalUnitInfo.rotationEnabled = true;
+        normalUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
         { 
             RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT 
         });

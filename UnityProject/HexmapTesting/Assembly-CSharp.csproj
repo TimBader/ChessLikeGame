@@ -49,6 +49,7 @@
      <Compile Include="Assets\GameControllerScript.cs" />
      <Compile Include="Assets\HexTile.cs" />
      <Compile Include="Assets\MovementObjects.cs" />
+     <Compile Include="Assets\Resources\Util.cs" />
      <Compile Include="Assets\SpawnTiles.cs" />
      <Compile Include="Assets\SpriteResourceManager.cs" />
      <Compile Include="Assets\TeamControllerScript.cs" />

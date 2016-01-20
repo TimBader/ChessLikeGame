@@ -506,8 +506,13 @@ public class SpawnTiles : MonoBehaviour {
 
 
 
-    public Vector2 hexCoordToPixelCoord(Vector2 hexCoord)
+    public Vector2 hexCoordToPixelCoord(Vector2 hexCoord, bool ignoreOffsets = false)
     {
+        if (ignoreOffsets)
+            return new Vector2(
+                hexCoord.x * TILE_WIDTH_PART,
+                hexCoord.x / 2 * TILE_HEIGHT + hexCoord.y * TILE_HEIGHT
+                );
         return new Vector2(
             hexCoord.x * TILE_WIDTH_PART + OriginTileWorldOffset.x,
             hexCoord.x / 2 * TILE_HEIGHT + hexCoord.y * TILE_HEIGHT + OriginTileWorldOffset.y

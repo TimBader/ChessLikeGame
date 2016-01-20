@@ -1,6 +1,15 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.4 ]
+Author: Tim Bader
+- Made the process of creating a new unit less cluttered.  MoveTypeObjects no longer require List<> type objects but now require simple arrays reducing number of lines required
+- Created a static Util class that holds generic functions that can be used anywhere
+- Fixed the not properly aligned rotation indicator
+
+*Extra Details
+- hexCoordToPixelCoord() from SpawnTiles now allows the ability to ignore the offsets (Issue behind rotation indicator's offset)
+
 [ v0.0.3 ]
 Author: Tim Bader
 - Added a rotation indicator for easier to tell rotation

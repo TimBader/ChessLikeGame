@@ -167,7 +167,7 @@ public class GameControllerScript : MonoBehaviour
         }
 
         //Testing
-        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, AbsoluteDirection.UP_RIGHT);
+        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, AbsoluteDirection.UP);
         /*spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 0)), 0, AbsoluteDirection.DOWN);
         spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(2, -1)), 0, AbsoluteDirection.DOWN);*/
 

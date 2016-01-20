@@ -68,6 +68,7 @@ public class UnitScript : MonoBehaviour {
 
         if (unitInfo.rotationEnabled)
         {
+            // Rotation Indicator
             Vector2 pos = gameControllerRef.getTileController().hexCoordToPixelCoord(getCoords());
             rotationIndicator = (GameObject)Instantiate(new GameObject(), new Vector3(pos.x, pos.y, 0), Quaternion.identity);
 
@@ -105,17 +106,13 @@ public class UnitScript : MonoBehaviour {
         {
             if (rotationIndicator)
             {
+                // Rotation Indicator
                 rotationIndicator.transform.position = this.transform.position;
 
-                Vector2 q = gameControllerRef.getTileController().hexCoordToPixelCoord(SpawnTiles.rotationDirectionToObject(rotationDir).getUpDirection() - gameControllerRef.getTileController().hexCoordToPixelCoord(new Vector2()));
-
-                q = q.normalized;
+                Vector2 q = gameControllerRef.getTileController().hexCoordToPixelCoord(SpawnTiles.rotationDirectionToObject(rotationDir).getUpDirection(), true).normalized;
                 rotationIndicator.transform.position = rotationIndicator.transform.position + new Vector3(q.x * 0.3f, q.y * 0.3f, 0.0f);
 
-                float radians = Mathf.Atan2(q.x, q.y);
-
-                rotationIndicator.transform.rotation = Quaternion.AngleAxis(radians * 180/Mathf.PI - 90.0f, new Vector3(0.0f,0.0f,-1.0f));
-                //print(Quaternion.AngleAxis(1.0f, new Vector3(0.0f, 0.0f, 1.0f)));
+                rotationIndicator.transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(q.x, q.y) * 180.0f/Mathf.PI - 90.0f, new Vector3(0.0f,0.0f,-1.0f));
             }
         }
     }

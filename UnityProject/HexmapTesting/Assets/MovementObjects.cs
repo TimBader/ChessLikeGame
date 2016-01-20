@@ -61,6 +61,7 @@ public abstract class MovementTypeParent
     {
         return movementType;
     }
+
 };
 
 
@@ -75,9 +76,20 @@ public class NormalMoveType : MovementTypeParent
     public List<List<Vector2>> moveLocations = new List<List<Vector2>>();
     public List<List<Vector2>> blockingLocations = new List<List<Vector2>>();
 
-    public NormalMoveType(List<List<Vector2>> moveLocs, List<List<Vector2>> blockingLocs)
+    public NormalMoveType(Vector2[][] moveLocs, Vector2[][] blockingLocs)
     {
-        initialize(moveLocs, blockingLocs);
+        List<List<Vector2>> newMoveLocs = new List<List<Vector2>>();
+        for (int i = 0; i < moveLocs.Length; i++ )
+        {
+            newMoveLocs.Add(Util.toList(moveLocs[i]));
+        }
+        List<List<Vector2>> newBlockingLocs = new List<List<Vector2>>();
+        for (int i = 0; i < blockingLocs.Length; i++)
+        {
+            newBlockingLocs.Add(Util.toList(blockingLocs[i]));
+        }
+        
+        initialize(newMoveLocs, newBlockingLocs);
     }
 
     public void initialize(List<List<Vector2>> moveLocs, List<List<Vector2>> blockingLocs)
@@ -259,19 +271,19 @@ public class JumpMoveType : MovementTypeParent
 {
     public List<Vector2> jumpPositions = new List<Vector2>();
 
-    public JumpMoveType(List<Vector2> jumpMovementPositions)
+    public JumpMoveType(Vector2[] jumpMovementPositions)
     {
         initialize(jumpMovementPositions);
     }
 
 
-    public void initialize(List<Vector2> jumpMovementPositions)
+    public void initialize(Vector2[] jumpMovementPositions)
     {
         if (!testForInvalidPositions(jumpPositions))
         {
             throw new UnityException("Jump Locations have an invalid positions (0,0)");
         }
-        jumpPositions = jumpMovementPositions;
+        jumpPositions =  Util.toList(jumpMovementPositions);
         movementType = MovementTypes.Jump;
     }
 
@@ -366,9 +378,9 @@ public class SlideMoveType : MovementTypeParent
     public List<Vector2> directions = new List<Vector2>();
     public List<int> ranges = new List<int>(); //-1 for infinite range
 
-    public SlideMoveType(List<Vector2> slideDirections, List<int> slideRanges)
+    public SlideMoveType(Vector2[] slideDirections, int[] slideRanges)
     {
-        initialize(slideDirections, slideRanges);
+        initialize(Util.toList(slideDirections), Util.toList(slideRanges));
     }
 
 
@@ -508,9 +520,9 @@ public class ChargeMoveType : MovementTypeParent
     public List<uint> ranges = new List<uint>(); //-1 for infinite range
     public List<uint> blockingExtent = new List<uint>();
 
-    public ChargeMoveType(List<Vector2> slideDirections, List<uint> slideRanges, List<uint> blockExtent)
+    public ChargeMoveType(Vector2[] slideDirections, uint[] slideRanges, uint[] blockExtent)
     {
-        initialize(slideDirections, slideRanges, blockExtent);
+        initialize(Util.toList(slideDirections), Util.toList(slideRanges), Util.toList(blockExtent));
     }
 
 
@@ -733,9 +745,9 @@ public class RangedMoveType : MovementTypeParent
 {
     public List<Vector2> relativeLocations = new List<Vector2>();
 
-    public RangedMoveType(List<Vector2> relativeLocs)
+    public RangedMoveType(Vector2[] relativeLocs)
     {
-        initialize(relativeLocs);
+        initialize(Util.toList(relativeLocs));
     }
 
 
