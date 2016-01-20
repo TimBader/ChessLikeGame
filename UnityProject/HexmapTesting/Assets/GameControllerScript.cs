@@ -118,7 +118,7 @@ public class GameControllerScript : MonoBehaviour
     {
 
         MovementTypeParent.setGameControllerRef(this);
-
+        UnitScript.gameControllerRef = this;
 
         TempUnitInfos.constructTempUnitInfos();
 
@@ -167,7 +167,7 @@ public class GameControllerScript : MonoBehaviour
         }
 
         //Testing
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 1, AbsoluteDirection.DOWN);
+        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, AbsoluteDirection.UP_RIGHT);
         /*spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 0)), 0, AbsoluteDirection.DOWN);
         spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(2, -1)), 0, AbsoluteDirection.DOWN);*/
 
@@ -827,6 +827,7 @@ public class GameControllerScript : MonoBehaviour
         if (clickedTile.getCurrentTileState() == TileState.SELECTABLE || clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
             //selectedUnit.getUnitInfo().movementObject.clickedInMode(clickedTile, selectedUnit, currentTeam);
+            /// check for invalid
             selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
 
         }

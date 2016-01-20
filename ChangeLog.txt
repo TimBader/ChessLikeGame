@@ -1,6 +1,11 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.3 ]
+Author: Tim Bader
+- Added a rotation indicator for easier to tell rotation
+- Changed a Knight and Ranged Unit's movements.
+
 [ v0.0.2 ]
 Author: Tim Bader
 - Redid the way units are created in code, reduced the number of lines needed but made it slightly more complicated

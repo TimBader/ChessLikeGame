@@ -146,11 +146,11 @@ public class TempUnitInfos
             (
                 toList(new Vector2[] 
                 { 
-                    vec(0, 3), vec(1, 2), vec(-1, 3) 
+                    vec(0, 3) 
                 })), 
                 new JumpMoveType(toList(new Vector2[]
                 { 
-                    vec(0, 1), vec(1, 0), vec(-1, 1)
+                    vec(0, 1), vec(0,-1)
                 })
             )
         });
@@ -248,7 +248,14 @@ public class TempUnitInfos
                 { 
                     1 
                 })
-            ) 
+            ),
+            new JumpMoveType
+            (
+                toList(new Vector2[]
+                {
+                    vec(1,0), vec(-1,1)
+                })
+            )
         });
         /*knightUnitInfo.relativeRotationDirections = new List<RelativeDirection>();
         knightUnitInfo.relativeRotationDirections.Add(RelativeDirection.FORWARD_RIGHT);

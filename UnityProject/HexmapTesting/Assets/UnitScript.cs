@@ -10,6 +10,9 @@ public enum UnitType
 
 public class UnitScript : MonoBehaviour {
 
+    /// FIND A BETTER WAY
+    public static GameControllerScript gameControllerRef = null;
+
     private HexTile occupyingHexTile = null;
     //private List<Vector2> movePositions;
     private int teamNumber = 0;
@@ -22,6 +25,8 @@ public class UnitScript : MonoBehaviour {
     private UnitInfo unitInfo;
 
     private AbsoluteDirection rotationDirection = AbsoluteDirection.UP;
+
+    private GameObject rotationIndicator = null;
 
     public HexTile getOccupyingHex()
     {
@@ -60,6 +65,21 @@ public class UnitScript : MonoBehaviour {
             setTeam(team);
             //getColorsSpriteRenderer().color = TeamControllerScript.getTeamColor(team);
         } 
+
+        if (unitInfo.rotationEnabled)
+        {
+            Vector2 pos = gameControllerRef.getTileController().hexCoordToPixelCoord(getCoords());
+            rotationIndicator = (GameObject)Instantiate(new GameObject(), new Vector3(pos.x, pos.y, 0), Quaternion.identity);
+
+            rotationIndicator.transform.parent = this.transform;
+
+            SpriteRenderer spr = rotationIndicator.AddComponent<SpriteRenderer>();
+
+            spr.sprite = SpriteResourceManager.loadSprite("RotationIndicator");
+
+            setRotationDirection(AbsoluteDirection.UP);
+ 
+        }
     }
 
 
@@ -80,6 +100,24 @@ public class UnitScript : MonoBehaviour {
     public void setRotationDirection(AbsoluteDirection rotationDir)
     {
         rotationDirection = rotationDir;
+
+        if (unitInfo.rotationEnabled)
+        {
+            if (rotationIndicator)
+            {
+                rotationIndicator.transform.position = this.transform.position;
+
+                Vector2 q = gameControllerRef.getTileController().hexCoordToPixelCoord(SpawnTiles.rotationDirectionToObject(rotationDir).getUpDirection() - gameControllerRef.getTileController().hexCoordToPixelCoord(new Vector2()));
+
+                q = q.normalized;
+                rotationIndicator.transform.position = rotationIndicator.transform.position + new Vector3(q.x * 0.3f, q.y * 0.3f, 0.0f);
+
+                float radians = Mathf.Atan2(q.x, q.y);
+
+                rotationIndicator.transform.rotation = Quaternion.AngleAxis(radians * 180/Mathf.PI - 90.0f, new Vector3(0.0f,0.0f,-1.0f));
+                //print(Quaternion.AngleAxis(1.0f, new Vector3(0.0f, 0.0f, 1.0f)));
+            }
+        }
     }
 
     public AbsoluteDirection getRotation()
@@ -98,7 +136,6 @@ public class UnitScript : MonoBehaviour {
     {
         return movePositions;
     }*/
-
 
 
     public SpriteRenderer getBaseSpriteRenderer()
