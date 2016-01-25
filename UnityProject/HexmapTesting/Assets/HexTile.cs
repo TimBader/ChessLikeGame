@@ -8,7 +8,8 @@ public enum TileState
     MOVEABLE,
     SELECTABLE,
     ATTACKABLE,
-    SPAWNABLE
+    SPAWNABLE,
+    NONSELECTABLE
 };
 
 public class HexTile : MonoBehaviour {
@@ -19,6 +20,7 @@ public class HexTile : MonoBehaviour {
     public Sprite selectableSprite;
     public Sprite attackableSprite;
     public Sprite spawnableSprite;
+    public Sprite nonSelectableSprite;
     //Sets this tile to be a location in which a king of the specific team could be spawned on, -1 for no king spawning
     public int teamSpawnLoc = -1;
 
@@ -65,6 +67,10 @@ public class HexTile : MonoBehaviour {
 
             case TileState.SPAWNABLE:
                 spriteRendererRef.sprite = spawnableSprite;
+                break;
+
+            case TileState.NONSELECTABLE:
+                spriteRendererRef.sprite = nonSelectableSprite;
                 break;
         }
     }

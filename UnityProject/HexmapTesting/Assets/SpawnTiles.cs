@@ -64,9 +64,9 @@ public class SpawnTiles : MonoBehaviour {
     public Sprite tempUntochedSprite;
 
     //Remember units are in unity units. 100px = 1 unity unit
-    public const float TILE_INNER_WIDTH = 0.80f;
+    public const float TILE_INNER_WIDTH = 0.79f;
     public const float TILE_OUTER_WIDTH = 0.35f;
-    public const float TILE_HEIGHT = 0.70f;
+    public const float TILE_HEIGHT = 0.69f;
     public const float TILE_WIDTH = TILE_INNER_WIDTH + 2*TILE_OUTER_WIDTH;
     public const float TILE_WIDTH_PART = TILE_INNER_WIDTH + TILE_OUTER_WIDTH;
 
@@ -231,100 +231,6 @@ public class SpawnTiles : MonoBehaviour {
         new Vector2(6, 8),
         new Vector2(7, 8)
     };
-
-    /* private Vector2[] tempMap = 
-    {
-      new Vector2(-3,0),
-      new Vector2(-3,1),
-      new Vector2(-3,2),
-      new Vector2(-3,3),
-
-      new Vector2(-2,0),
-      new Vector2(-2,1),
-      new Vector2(-2,2),
-
-      new Vector2(-1,-1),
-      new Vector2(-1,0),
-      new Vector2(-1,1),
-      //new Vector2(-1,2),
-
-      new Vector2(0,-1),
-      new Vector2(0,0),
-      //new Vector2(0,1),
-
-      new Vector2(1,-2),
-      new Vector2(1,-1),
-      new Vector2(1,0),
-      //new Vector2(1,1),
-
-      new Vector2(2,-2),
-      new Vector2(2,-1),
-      new Vector2(2,0),
-
-      new Vector2(3,-3),
-      new Vector2(3,-2),
-      new Vector2(3,-1),
-      new Vector2(3,0),
-
-
-      new Vector2(-3, 4),
-      new Vector2(-3, 5),
-      new Vector2(-3, 6),
-      new Vector2(-3, 7),
-
-      new Vector2(-2, 3),
-      new Vector2(-2, 4),
-      new Vector2(-2, 5),
-      new Vector2(-2, 6),
-
-      //new Vector2(-1, 3),
-      new Vector2(-1, 4),
-      new Vector2(-1, 5),
-      new Vector2(-1, 6),
-
-      //new Vector2(0, 2),
-      //new Vector2(0, 3),
-      new Vector2(0, 4),
-      new Vector2(0, 5),
-
-      //new Vector2(1, 2),
-      new Vector2(1, 3),
-      new Vector2(1, 4),
-      new Vector2(1, 5),
-
-      new Vector2(2, 1),
-      new Vector2(2, 2),
-      new Vector2(2, 3),
-      new Vector2(2, 4),
-
-      new Vector2(3, 1),
-      new Vector2(3, 2),
-      new Vector2(3, 3),
-      new Vector2(3, 4)
-    };
-
-    //Spawn points for teams
-    private Vector2[] tempTeam0SpawnPoints = 
-    {
-        new Vector2(-3, 0),
-        new Vector2(-2, 0),
-        new Vector2(-1, -1),
-        new Vector2(0, -1),
-        new Vector2(1, -2),
-        new Vector2(2, -2),
-        new Vector2(3, -3)
-    };
-
-    private Vector2[] tempTeam1SpawnPoints =
-    {
-        new Vector2(-3, 7),
-        new Vector2(-2, 6),
-        new Vector2(-1, 6),
-        new Vector2(-0, 5),
-        new Vector2(1, 5),
-        new Vector2(2, 4),
-        new Vector2(3, 4)
-    };*/
 
 
 
@@ -676,7 +582,7 @@ public class SpawnTiles : MonoBehaviour {
         throw new UnityException("hex coord: (" + relativePosition + ") is not an adjacent/relative coord");
     }
 
-    public static Vector2 rotationDirectionToRelativePos(AbsoluteDirection rot)
+    public static Vector2 absoluteDirectionToRelativePos(AbsoluteDirection rot)
     {
         return rotationDirectionToObject(rot).getUpDirection();
     }

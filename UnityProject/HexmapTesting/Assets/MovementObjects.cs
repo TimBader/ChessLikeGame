@@ -71,12 +71,12 @@ public abstract class MovementTypeParent
         //  ------  Normal  ------  //
 //******************************************************************************************************************************************************************************************************************
 
-public class NormalMoveType : MovementTypeParent
+public class PathMoveType : MovementTypeParent
 {
     public List<List<Vector2>> moveLocations = new List<List<Vector2>>();
     public List<List<Vector2>> blockingLocations = new List<List<Vector2>>();
 
-    public NormalMoveType(Vector2[][] moveLocs, Vector2[][] blockingLocs)
+    public PathMoveType(Vector2[][] moveLocs, Vector2[][] blockingLocs)
     {
         List<List<Vector2>> newMoveLocs = new List<List<Vector2>>();
         for (int i = 0; i < moveLocs.Length; i++ )
@@ -182,23 +182,11 @@ public class NormalMoveType : MovementTypeParent
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            if (clickedTile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("King Destroyed");
-                Application.Quit();
-            }
-            else
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("Unit Destroyed");
-            }
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
         }
 
         gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
         //switchToNextTeam();
         gameControllerRef.altCounter = 0;
 
@@ -322,23 +310,11 @@ public class JumpMoveType : MovementTypeParent
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            if (clickedTile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("King Destroyed");
-                Application.Quit();
-            }
-            else
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("Unit Destroyed");
-            }
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
         }
 
         gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
@@ -461,23 +437,11 @@ public class SlideMoveType : MovementTypeParent
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            if (clickedTile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("King Destroyed");
-                Application.Quit();
-            }
-            else
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("Unit Destroyed");
-            }
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
         }
 
         gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
         //switchToNextTeam();
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
@@ -660,26 +624,14 @@ public class ChargeMoveType : MovementTypeParent
                 {
                     if (tile.getOccupyingUnit())
                     {
-                        if (tile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-                        {
-                            tile.getOccupyingUnit().destroyUnit();
-                            tile.setOccupyingUnit(null);
-                            gameControllerRef.printString("King Destroyed");
-                            Application.Quit();
-                        }
-                        else
-                        {
-                            tile.getOccupyingUnit().destroyUnit();
-                            tile.setOccupyingUnit(null);
-                            gameControllerRef.printString("Unit Destroyed");
-                        }
+                        gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
                     }
                 }
             }
         }
 
         gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
         //switchToNextTeam();
 
         gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
@@ -798,19 +750,7 @@ public class RangedMoveType : MovementTypeParent
     {
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            if (clickedTile.getOccupyingUnit().getUnitType() == UnitType.KingUnit)
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("King Destroyed");
-                Application.Quit();
-            }
-            else
-            {
-                clickedTile.getOccupyingUnit().destroyUnit();
-                clickedTile.setOccupyingUnit(null);
-                gameControllerRef.printString("Unit Destroyed");
-            }
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
 
             gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }

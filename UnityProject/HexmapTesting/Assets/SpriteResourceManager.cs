@@ -12,10 +12,8 @@ public class SpriteResourceManager : MonoBehaviour {
         Sprite sprite;
         if  (alreadyLoadedSprites.TryGetValue(spriteName, out sprite))
         {
-            //print("Already had loaded " + spriteName);
             return sprite;
         }
-        //print("Loading " + spriteName);
         sprite = Resources.Load<Sprite>(spriteName);
         if (sprite == null)
         {

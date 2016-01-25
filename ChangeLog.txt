@@ -1,6 +1,25 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.5 ]
+Author: Tim Bader
+- Added zoom functionality, with adjustable attributes
+- Added Temporary UI for some nice instructions
+- Can now click on the same tile when selecting spawned unit's rotation to skip
+- Made sure with each movetype that the game will end when the king is captured
+- Added and Integrated color palettes for each team, right now supporting up to 4 colors as well as integration with sprites
+- Provided an example sprite Unit that helps displays how the colorization works with team color pallets set as
+- Double tapping escape will exit the game
+
+*Extra
+- Set all images to use point filtering
+- Removed a lot of commented out junk
+- Background is now black... since its cool
+- Normal tiles are now grey
+- When rotating, the tile the unit is already facing is now colored grey
+- Units's depth is not based on unity's y position so units higher on the screen/field appear to be behind units who are farther down from them
+- Units now have an global offset for them when it comes to positioning
+
 [ v0.0.4 ]
 Author: Tim Bader
 - Made the process of creating a new unit less cluttered.  MoveTypeObjects no longer require List<> type objects but now require simple arrays reducing number of lines required

@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public enum InteractionStates
 {
-    SelectingKingLocation,
+    SelectingLordLocation,
     SelectingUnitSpawnPoint,
     SelectingSpawnedUnitDirection,
     SelectingUnitToMove,
@@ -19,7 +20,7 @@ public class GameControllerScript : MonoBehaviour
 {
     public GameObject teamControllerType;
 
-    private InteractionStates interactionState = InteractionStates.SelectingKingLocation;
+    private InteractionStates interactionState = InteractionStates.SelectingLordLocation;
     private UnitScript selectedUnit = null;
     private bool interactionEnabled = false;
     private uint numberOfTeams = 2;
@@ -27,35 +28,44 @@ public class GameControllerScript : MonoBehaviour
     private List<TeamControllerScript> teamControllers = new List<TeamControllerScript>();
     private SpawnTiles tileControllerScript = null;
 
-    private SpriteResourceManager spriteResourceManagerScript = null;
+    //private SpriteResourceManager spriteResourceManagerScript = null;
 
     private Dictionary<string, UnitInfo> unitInfoDictionary = new Dictionary<string, UnitInfo>();
 
     private UnitScript justSpawnedUnit = null;
 
+    public Camera mainCamera;
+
+    private float minZoomSize = 1.0f;
+    private float maxZoomSize = 6.0f;
+    private float zoomRate = 2.0f;
+
     //private List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
 
     private float rightClickTimeCache;
 
+    private float escapeTimeCache;
+
     //Counter for alternating movements
     public int altCounter = 0;
 
-    /*private Color[] teamColorList = 
+    ///Temp ui stuff
+    /// //////////////////////////////////////////////////////////
+    public Text tempUIText;
+    public Text tempUIText2;
+    
+    public void setUIText(string text, Color color)
     {
-        new Color(0.0f, 0.0f, 1.0f),
-        new Color(1.0f, 0.0f, 0.0f)
-    };
+        tempUIText.text = text;
+        tempUIText.color = color;
+    }
 
-
-    public Color getTeamColor(int teamNum = 0)
+    public void setUIText2(string text, Color color)
     {
-        if (teamNum >= teamColorList.Length)
-        {
-            throw new UnityException("Team " + teamNum + " does not have a team color set");
-        }
-        return teamColorList[teamNum];
-    }*/
-
+        tempUIText2.text = text;
+        tempUIText2.color = color;
+    }
+    /// //////////////////////////////////////////////////////////
 
     public UnitScript getSelectedUnit()
     {
@@ -88,7 +98,7 @@ public class GameControllerScript : MonoBehaviour
         {
             throw new UnityException("A unit's name is not defined");
         }
-        if (info.baseSpriteName == "" && info.colorsSpriteName == "")
+        if (info.baseSpriteName == "" && info.color0SpriteName == "" && info.color1SpriteName == "" && info.color2SpriteName == "" && info.color3SpriteName == "")
         {
             throw new UnityException(info.unitName + " does not have any images named");
         }
@@ -124,7 +134,6 @@ public class GameControllerScript : MonoBehaviour
 
 
         bool foundTileController = false;
-        //bool foundSpriteManager = false;
         GameObject[] gos = FindObjectsOfType<GameObject>();
         for (int i = 0; i < gos.Length; i++)
         {
@@ -134,16 +143,6 @@ public class GameControllerScript : MonoBehaviour
                 tileControllerScript = spawnTilesScript;
                 foundTileController = true;
             }
-            /*
-            else
-            {
-                SpriteResourceManager spm = (SpriteResourceManager)gos[i].GetComponent(typeof(SpriteResourceManager));
-                if (spm != null)
-                {
-                    spriteResourceManagerScript = spm;
-                    foundSpriteManager = true;
-                }
-            }*/
             if (foundTileController/* && foundSpriteManager*/)
             {
                 break;
@@ -153,10 +152,7 @@ public class GameControllerScript : MonoBehaviour
         {
             throw new MissingComponentException("Tile Controller Script not found, please include in scene");
         }
-        /*if (!foundSpriteManager)
-        {
-            throw new MissingComponentException("Sprite Resource Manager Script not found, please include in scene");
-        }*/
+
         tileControllerScript.initialize();
 
 
@@ -166,13 +162,13 @@ public class GameControllerScript : MonoBehaviour
             addNewUnitInfo(TempUnitInfos.getTempUnitInfos()[i]);
         }
 
+        setUIText("Temp", Color.black);
+
         //Testing
         spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, AbsoluteDirection.UP);
-        /*spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 0)), 0, AbsoluteDirection.DOWN);
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(2, -1)), 0, AbsoluteDirection.DOWN);*/
 
         enableInteraction();
-        switchInteractionState(InteractionStates.SelectingKingLocation);
+        switchInteractionState(InteractionStates.SelectingLordLocation);
     }
 
 
@@ -210,10 +206,10 @@ public class GameControllerScript : MonoBehaviour
 
                 if (diff <= 0.20)
                 {
-                    if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
+                    /*if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
                     {
                         switchInteractionState(InteractionStates.SelectingUnitToMove);
-                    }
+                    }*/
 
                     if (interactionState == InteractionStates.SelectingUnitMovement)
                     {
@@ -228,6 +224,20 @@ public class GameControllerScript : MonoBehaviour
 
                 rightClickTimeCache = Time.time;
             }
+            if (Input.GetButtonDown("Cancel"))
+            {
+                float diff = Time.time - escapeTimeCache;
+
+                if (diff <= 0.20f)
+                {
+                    print("Quiting Application");
+                    Application.Quit();
+                }
+
+                escapeTimeCache = Time.time;
+            }
+
+
             if (Input.GetButtonDown("Jump"))
             {
                 if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
@@ -252,6 +262,14 @@ public class GameControllerScript : MonoBehaviour
                     switchInteractionState(InteractionStates.SelectingUnitMovement);
                 }
             }
+            if (Input.GetAxis("Mouse ScrollWheel") != 0.0f)
+            {
+                float newZoom = mainCamera.orthographicSize - Input.GetAxis("Mouse ScrollWheel")*zoomRate;
+                if (newZoom >= minZoomSize && newZoom <= maxZoomSize )
+
+                mainCamera.orthographicSize = newZoom;
+            }
+
         }
     }
 
@@ -272,7 +290,7 @@ public class GameControllerScript : MonoBehaviour
 
 
 
-    void createTeamController(int teamNum, UnitScript kingRef)
+    void createTeamController(int teamNum, UnitScript lordRef)
     {
         for (int i = 0; i < teamControllers.Count; i++)
         {
@@ -283,7 +301,7 @@ public class GameControllerScript : MonoBehaviour
         }
         GameObject iTeam = (GameObject)Instantiate(teamControllerType, Vector2.zero, Quaternion.identity);
         TeamControllerScript teamScript = (TeamControllerScript)iTeam.GetComponent(typeof(TeamControllerScript));
-        teamScript.setKing(kingRef);
+        teamScript.setLord(lordRef);
         teamScript.setTeam(teamNum);
         teamControllers.Add(teamScript);
 
@@ -304,6 +322,42 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
+
+    UnitScript spawnUnit(string unitIDName, HexTile spawningTile, int team, AbsoluteDirection spawnedUnitDirection = AbsoluteDirection.UP)
+    {
+        GameObject unitGameObject = (GameObject)Instantiate(tileControllerScript.spawnUnitType);
+        UnitScript unitScript = (UnitScript)unitGameObject.GetComponent(typeof(UnitScript));
+
+        UnitInfo spawnedUnitInfo = getUnitInfo(unitIDName);
+
+        unitScript.initialize(spawnedUnitInfo, team);
+
+        spawningTile.setOccupyingUnit(unitScript);
+        unitScript.setOccupyingHex(spawningTile);
+
+        unitScript.setRotationDirection(spawnedUnitDirection);
+
+        //unitScript.setTeam(team);
+
+        return unitScript;
+    }
+
+
+
+    public void captureUnit(UnitScript capturedUnit)
+    {
+        if (capturedUnit.getUnitType() == UnitType.LordUnit)
+        {
+            print("Lord Destroyed, Game Over");
+            Application.Quit();
+        }
+        else
+        {
+            print("Unit Destroyed");
+        }
+        capturedUnit.getOccupyingHex().setOccupyingUnit(null);
+        capturedUnit.destroyUnit();
+    }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     // ****** Switch Interaction States ****** //
@@ -332,8 +386,8 @@ public class GameControllerScript : MonoBehaviour
         interactionState = state;
         switch (state)
         {
-            case InteractionStates.SelectingKingLocation:
-                startSelectingKingLocation();
+            case InteractionStates.SelectingLordLocation:
+                startSelectingLordLocation();
                 break;
 
             case InteractionStates.SelectingUnitSpawnPoint:
@@ -364,11 +418,14 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting King Location
-    void startSelectingKingLocation()
+// -- Start Selecting Lord Location
+    void startSelectingLordLocation()
     {
-        print("Select Team " + currentTeam + "'s King Location");
+        print("Select Team " + currentTeam + "'s Lord Location");
         selectedUnit = null;
+
+        setUIText("Team: " + currentTeam + ", Select Lord Starting Location", new Color(1.0f, 1.0f, 0.0f));
+        setUIText2("", Color.black);
 
         List<HexTile> tiles = tileControllerScript.getAllTiles();
         for (int i = 0; i < tiles.Count; i++)
@@ -397,7 +454,10 @@ public class GameControllerScript : MonoBehaviour
 
         tileControllerScript.switchAllTileStates();
 
-        List<HexTile> adjacent = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getKing().getOccupyingHex());
+        setUIText("Team: " + currentTeam + ", Select Unit Spawn Point", new Color(1.0f, 1.0f, 0.0f));
+        setUIText2("Skip <Space>", Color.yellow);
+
+        List<HexTile> adjacent = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getLord().getOccupyingHex());
 
         bool freeSpace = false;
         for (int i = 0; i < adjacent.Count; i++)
@@ -427,6 +487,9 @@ public class GameControllerScript : MonoBehaviour
         {
             throw new UnityException("selectedUnit must not be null for startSelectingSpawnedUnitDirection()");
         }
+
+        setUIText("Team: " + currentTeam + ", Select " + selectedUnit.getUnitInfo().unitName + "'s Starting Rotation", new Color(0.0f, 1.0f, 0.0f));
+        setUIText2("Skip <Space>", Color.yellow);
 
         tileControllerScript.switchAllTileStates();
 
@@ -474,6 +537,9 @@ public class GameControllerScript : MonoBehaviour
 
         UnitScript[] allUnits = FindObjectsOfType<UnitScript>();
 
+        setUIText("Team: " + currentTeam + ", Select Unit to Move", new Color(0.0f, 1.0f, 1.0f));
+        setUIText2("", Color.yellow);
+
         bool atLeastOneCanMove = false;
         for (int i = 0; i < allUnits.Length; i++)
         {
@@ -517,6 +583,17 @@ public class GameControllerScript : MonoBehaviour
 
         tileControllerScript.switchAllTileStates();
 
+        setUIText("Team: " + currentTeam + ", Select " + selectedUnit.getUnitInfo().unitName + "'s Movement", new Color(0.0f, 1.0f, 1.0f));
+        if (selectedUnit.getUnitInfo().movementObjects.Count > 1)
+        {
+            setUIText2("Select Alternate Moveset(s) <Left Alt>\nDeselect <Double Right Click>", Color.cyan);
+        }
+        else
+        {
+            setUIText2("Deselect <Double Right Click>", Color.cyan);
+        }
+
+
         selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
 
         //Temporary Alt counter switching
@@ -544,6 +621,9 @@ public class GameControllerScript : MonoBehaviour
         tileControllerScript.switchAllTileStates();
 
         UnitScript[] units = FindObjectsOfType<UnitScript>();
+
+        setUIText("Team: " + currentTeam + ", Select Unit to Rotate", new Color(0.0f, 1.0f, 0.0f));
+        setUIText2("Skip <Space>", Color.green);
 
         bool foundOne = false;
         for (int i = 0; i < units.Length; i++)
@@ -578,23 +658,31 @@ public class GameControllerScript : MonoBehaviour
 
         tileControllerScript.switchAllTileStates();
 
+        setUIText("Team: " + currentTeam + ", Select " + selectedUnit.getUnitInfo().unitName + "'s Rotation", new Color(0.0f, 1.0f, 0.0f));
+        setUIText2("Skip <Space>\nDeselect <Double Right Click>", Color.green);
+
         selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
 
         List<RelativeDirection> relativeDirections = selectedUnit.getUnitInfo().relativeRotationDirections;
+
+        Vector2 originalHexCoordPos = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(selectedUnit.getRotation());
+        tileControllerScript.addNewTempTile(originalHexCoordPos);
+
+        tileControllerScript.getTileFromHexCoord(originalHexCoordPos, true).switchState(TileState.NONSELECTABLE);
 
         for (int i = 0; i < relativeDirections.Count; i++)
         {
             AbsoluteDirection rotationDirection = SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), relativeDirections[i]);
             
             //Creating Temp Tiles if any just incase
-            Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotationDirectionToRelativePos(rotationDirection);
+            Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(rotationDirection);
             tileControllerScript.addNewTempTile(hexCoord);
 
             HexTile tile = tileControllerScript.getTileFromHexCoord(hexCoord, true);
-            if (tile != null)
-            {
+            /*if (tile != null)
+            {*/
                 tile.switchState(TileState.MOVEABLE);
-            }
+            /*}*/
         }
     }
 
@@ -610,8 +698,8 @@ public class GameControllerScript : MonoBehaviour
         {
             switch (interactionState)
             {
-                case InteractionStates.SelectingKingLocation:
-                    selectingKingLocation(clickedTile);
+                case InteractionStates.SelectingLordLocation:
+                    selectingLordLocation(clickedTile);
                     break;
 
                 case InteractionStates.SelectingUnitSpawnPoint:
@@ -642,8 +730,8 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting King Location
-    void selectingKingLocation(HexTile clickedTile)
+// -- Selecting Lord Location
+    void selectingLordLocation(HexTile clickedTile)
     {
         List<HexTile> tiles = tileControllerScript.getAllTiles();
         for (int i = 0; i < tiles.Count; i++)
@@ -655,40 +743,17 @@ public class GameControllerScript : MonoBehaviour
                     if (tiles[i].teamSpawnLoc == currentTeam)
                     {
 
-                        //Spawing guy on Tile
-                        /*GameObject spawningUnit = (GameObject)Instantiate(tileControllerScript.spawnUnitType, tileControllerScript.hexCoordToPixelCoord(clickedTile.getCoords()), Quaternion.identity);
-                        UnitScript unitScript = (UnitScript)spawningUnit.GetComponent(typeof(UnitScript));
-                        clickedTile.setOccupyingUnit(unitScript);
-                        unitScript.setOccupyingHex(clickedTile);
+                        UnitScript unitScript = spawnUnit("Lord", clickedTile, currentTeam);
 
-                        UnitInfo newKingInfo = getUnitInfo("King");
-                        unitScript.initialize(newKingInfo);
+                        unitScript.setUnitType(UnitType.LordUnit);
 
-                        //unitScript.setMovePositions(newKingInfo.movements);
-                        if (newKingInfo.baseSpriteName != null)
-                        {
-                            unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.baseSpriteName);
-                        }
-                        if (newKingInfo.colorsSpriteName != null)
-                        {
-                            unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newKingInfo.colorsSpriteName);
-                        } 
-                        unitScript.getColorsSpriteRenderer().color = getTeamColor(currentTeam);
-
-                        //unitScript.setMovePositions(rm2);
-                        unitScript.setTeam(currentTeam);*/
-
-                        UnitScript unitScript = spawnUnit("King", clickedTile, currentTeam);
-
-                        unitScript.setUnitType(UnitType.KingUnit);
-
-                        //Set the above Character as the King for teamController
+                        //Set the above Character as the Lord for teamController
                         createTeamController(currentTeam, unitScript);
 
                         if (currentTeam + 1 < numberOfTeams)
                         {
                             currentTeam++;
-                            switchInteractionState(InteractionStates.SelectingKingLocation);
+                            switchInteractionState(InteractionStates.SelectingLordLocation);
                         }
                         else
                         {
@@ -701,36 +766,6 @@ public class GameControllerScript : MonoBehaviour
         }
     }
 
-////////////////////////////////////////////////////////////////////////////////
-    UnitScript spawnUnit(string unitIDName, HexTile spawningTile, int team, AbsoluteDirection spawnedUnitDirection = AbsoluteDirection.UP)
-    {
-        GameObject unitGameObject = (GameObject)Instantiate(tileControllerScript.spawnUnitType, tileControllerScript.hexCoordToPixelCoord(spawningTile.getCoords()), Quaternion.identity);
-        UnitScript unitScript = (UnitScript)unitGameObject.GetComponent(typeof(UnitScript));
-
-        spawningTile.setOccupyingUnit(unitScript);
-        unitScript.setOccupyingHex(spawningTile);
-
-        UnitInfo spawnedUnitInfo = getUnitInfo(unitIDName);
-
-        unitScript.initialize(spawnedUnitInfo);
-
-        unitScript.setRotationDirection(spawnedUnitDirection);
-
-        /*if (newUnitInfo.baseSpriteName != null)
-        {
-            unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.baseSpriteName);
-        }
-        if (newUnitInfo.colorsSpriteName != null)
-        {
-            unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.colorsSpriteName);
-        }*/
-        //unitScript.setMovePositions(newUnitInfo.movements);
-        unitScript.setTeam(team);
-
-        return unitScript;
-    }
-////////////////////////////////////////////////////////////////////////////////
-
 
 // -- Selecting Unit Spawn Point
     void selectingUnitSpawnPoint(HexTile clickedTile)
@@ -738,7 +773,7 @@ public class GameControllerScript : MonoBehaviour
         if (clickedTile.getOccupyingUnit() == null)
         {
             bool spawned = false;
-            List<HexTile> adjacentTiles = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getKing().getOccupyingHex());
+            List<HexTile> adjacentTiles = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getLord().getOccupyingHex());
             for (int i = 0; i < adjacentTiles.Count; i++)
             {
                 if (adjacentTiles[i] != null)
@@ -755,28 +790,6 @@ public class GameControllerScript : MonoBehaviour
                             "RangedUnit"
                         };
 
-                        /*GameObject spawningUnit = (GameObject)Instantiate(tileControllerScript.spawnUnitType, tileControllerScript.hexCoordToPixelCoord(clickedTile.getCoords()), Quaternion.identity);
-                        UnitScript unitScript = (UnitScript)spawningUnit.GetComponent(typeof(UnitScript));
-                        clickedTile.setOccupyingUnit(unitScript);
-                        unitScript.setOccupyingHex(clickedTile);
-
-                        UnitInfo newUnitInfo = getUnitInfo(tempSpawnList[Random.Range(0, tempSpawnList.Length)]);
-
-                        unitScript.initialize(newUnitInfo);
-
-                        if (newUnitInfo.baseSpriteName != null)
-                        {
-                            unitScript.getBaseSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.baseSpriteName);
-                        }
-                        if (newUnitInfo.colorsSpriteName != null)
-                        {
-                            unitScript.getColorsSpriteRenderer().sprite = spriteResourceManagerScript.loadSprite(newUnitInfo.colorsSpriteName);
-                        }
-                        unitScript.getColorsSpriteRenderer().color = getTeamColor(currentTeam);
-                        //unitScript.setMovePositions(newUnitInfo.movements);
-                        unitScript.setTeam(currentTeam);*/
-
-                        //selectedUnit = unitScript;
 
                         selectedUnit = spawnUnit(tempSpawnList[Random.Range(0, tempSpawnList.Length)], clickedTile, currentTeam);
 
@@ -799,7 +812,12 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Spawned Unit's Direction
     void selectingSpawnedUnitDirection(HexTile clickedTile)
     {
-        if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTED)
+        {
+            switchInteractionState(InteractionStates.SelectingUnitToMove);
+        }
+
+        else if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
         {
             Vector2 relPosOfClicked = clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords();
 
@@ -826,8 +844,6 @@ public class GameControllerScript : MonoBehaviour
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTABLE || clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            //selectedUnit.getUnitInfo().movementObject.clickedInMode(clickedTile, selectedUnit, currentTeam);
-            /// check for invalid
             selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
 
         }
@@ -837,11 +853,6 @@ public class GameControllerScript : MonoBehaviour
             {
                 switchInteractionState(InteractionStates.SelectingUnitToMove);
             }
-            /*else if (clickedTile.getOccupyingUnit().getTeam() == currentTeam)
-            {
-                selectedUnit = clickedTile.getOccupyingUnit();
-                switchInteractionState(InteractionStates.SelectingUnitMovement);
-            }*/
         }
     }
 
@@ -861,14 +872,7 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit Rotation
     void selectingUnitRotation(HexTile clickedTile)
     {
-        /*if (clickedTile.getOccupyingUnit())
-        {
-            if (selectedUnit == clickedTile.getOccupyingUnit())
-            {
-                switchInteractionState(InteractionStates.SelectingUnitToRotate);
-            }
-        }
-        else */if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
         {
             selectedUnit.setRotationDirection(SpawnTiles.relativePosToAbsoluteDirection(clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords()));
 

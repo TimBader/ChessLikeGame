@@ -1,4 +1,4 @@
-Initialize engine version: 5.2.3f1 (f3d16a1fa2dd)
+Initialize engine version: 5.3.1f1 (cc9cbbcc37b4)
 GfxDevice: creating device client; threaded=1
 Direct3D:
     Version:  Direct3D 11.0 [level 11.0]
@@ -6,52 +6,47 @@ Direct3D:
     Vendor:   ATI
     VRAM:     2032 MB
 Begin MonoManager ReloadAssembly
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.dll (this message is harmless)
-Loading C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.dll into Unity Child Domain
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\Assembly-CSharp.dll (this message is harmless)
-Loading C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.UI.dll (this message is harmless)
-Loading C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
-Loading C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\System.Core.dll (this message is harmless)
-- Completed reload, in  0.098 seconds
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.dll (this message is harmless)
+Loading C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.dll into Unity Child Domain
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\Assembly-CSharp.dll (this message is harmless)
+Loading C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\Assembly-CSharp.dll into Unity Child Domain
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.UI.dll (this message is harmless)
+Loading C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.UI.dll into Unity Child Domain
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.Networking.dll (this message is harmless)
+Loading C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\UnityEngine.Networking.dll into Unity Child Domain
+- Completed reload, in  0.033 seconds
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\System.Core.dll (this message is harmless)
+Platform assembly: C:\Users\Tim\Desktop\ChessLikeGame\ChessLikeGame\UnityProject\HexmapTesting\testBuild_Data\Managed\System.dll (this message is harmless)
 desktop: 1920x1080 60Hz; virtual: 3360x1080 at 0,0
 <RI> Initializing input.
 <RI> Input initialized.
 <RI> Initialized touch support.
-Platform assembly: C:\Users\Tim\Documents\UnityProjects\HexmapTesting\testBuild_Data\Managed\System.dll (this message is harmless)
+UnloadTime: 0.408490 ms
 MapWidth: 8
  
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
 
 MapHeight: 15
  
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
 
-Select Team 0's King Location
+Select Team 0's Lord Location
  
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
 
-Setting up 1 worker threads for Enlighten.
-  Thread -> id: 36c -> priority: 1 
-Select Team 1's King Location
+Select Team 1's Lord Location
  
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
-
-Cannot spawn, No spawnable locations
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
-
-TEAM: 0 --> Select Unit To Move
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
-
-Game is over mate, Team: 0 cannot move any of their units
- 
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
 
 TEAM: 0 --> Select Unit Spawn Point.  Press [SpaceBar] to skip
  
-(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 64)
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
+
+TEAM: 0 --> Select Spawned Unit's Rotation.  Press [SpaceBar] to skip
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
+
+TEAM: 0 --> Select Unit To Move
+ 
+(Filename: C:/buildslave/unity/build/artifacts/generated/common/runtime/UnityEngineDebugBindings.gen.cpp Line: 37)
 
