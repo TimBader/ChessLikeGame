@@ -84,6 +84,7 @@ public class TeamControllerScript : MonoBehaviour {
 
     private int team = 0;
     private UnitScript lordRef = null;
+    public AbsoluteDirection defaultDirection = AbsoluteDirection.UP;
 
     private static Color[] teamColorList = 
     {

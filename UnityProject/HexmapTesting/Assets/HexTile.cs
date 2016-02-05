@@ -23,6 +23,7 @@ public class HexTile : MonoBehaviour {
     public Sprite nonSelectableSprite;
     //Sets this tile to be a location in which a king of the specific team could be spawned on, -1 for no king spawning
     public int teamSpawnLoc = -1;
+    public AbsoluteDirection teamSpawnDirection = AbsoluteDirection.UP; 
 
     private Vector2 hexCoord = new Vector2();
     private bool posHasBeenSet = false;

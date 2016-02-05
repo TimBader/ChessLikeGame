@@ -25,6 +25,11 @@ public class TempUnitInfos
         return new Vector2(x, y);
     }
 
+    private static PathMoveType.PathPos pathPos(Vector2 pos, bool moveable)
+    {
+        return new PathMoveType.PathPos(pos, moveable);
+    }
+
     public static void constructTempUnitInfos()
     {
 
@@ -125,13 +130,15 @@ public class TempUnitInfos
         { 
             new SlideMoveType
             ( 
-                new Vector2[] 
+                //new Vector2[] 
+                new RelativeDirection[]
                 { 
-                    RotationDirectionObject.UP.getUpDirection() 
+                    RelativeDirection.FORWARD
+                    //RotationDirectionObject.UP.getUpDirection() 
                 }, 
                 new int[] 
                 { 
-                    3 
+                    -1//3 -1 means infinite range
                 }
             ) 
         });
@@ -153,17 +160,21 @@ public class TempUnitInfos
         { 
             new ChargeMoveType
             (
-                new Vector2[] 
+                new RelativeDirection[] 
                 { 
-                    RotationDirectionObject.UP.getUpDirection() 
+                    RelativeDirection.FORWARD
+                    //RotationDirectionObject.UP.getUpDirection()
+                   //RotationDirectionObject.DOWN.getUpDirection()//Testing stuff
+                }, 
+                new int[] 
+                { 
+                    -1
+                    //5
                 }, 
                 new uint[] 
                 { 
-                    5 
-                }, 
-                new uint[] 
-                { 
-                    1 
+                    1
+                    //1
                 }
             ),
             new JumpMoveType
@@ -187,41 +198,50 @@ public class TempUnitInfos
         ////////////////
         UnitInfo normalUnitInfo = new UnitInfo();
         normalUnitInfo.unitName = "NormalUnit";
-        normalUnitInfo.color0SpriteName = "Pentagon_Colors";
+        normalUnitInfo.color0SpriteName = "Pentagon_Colors";//Pentagon_Colors
         normalUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new PathMoveType
             (
-                new Vector2[][] 
-                { 
-                    new Vector2[] 
-                    { 
-                        vec(1, 2) 
-                    }, 
-                    new Vector2[] 
-                    { 
-                        vec(-1, 3) 
+                new PathMoveType.PathPos[][]
+                {
+                    /*new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(0, 1), false),
+                        pathPos( vec(0, 2), true),
+                        pathPos( vec(0, 3), false),
+                        pathPos( vec(1, 3), true)
+                    },
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(0, 1), false),
+                        pathPos( vec(0, 2), true),
+                        pathPos( vec(0, 3), false),
+                        pathPos( vec(-1, 4), true)
+                    }*/
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(1, 0), false),
+                        pathPos( vec(1, 1), false),
+                        pathPos( vec(1, 2), false),
+                        pathPos( vec(0, 3), true)
+                    },
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(-1, 1), false),
+                        pathPos( vec(-1, 2), false),
+                        pathPos( vec(-1, 3), false),
+                        pathPos( vec(0, 3), true)
                     }
-                }, 
-                new Vector2[][] 
-                { 
-                    new Vector2[] 
-                    { 
-                        vec(1, 0), vec(1, 1) 
-                    }, 
-                    new Vector2[] 
-                    { 
-                        vec(-1, 1), vec(-1, 2) 
-                    } 
                 }
-            ), 
+            ),
             new JumpMoveType
             (
-                new Vector2[] 
-                { 
-                    vec(0, 1), vec(0, -1) 
+                new Vector2[]
+                {
+                    vec(1,0), vec(-1,1)
                 }
-            ) 
+            )
         });
         normalUnitInfo.rotationEnabled = true;
         normalUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
@@ -237,3 +257,38 @@ public class TempUnitInfos
         return tempUnitInfos;
     }
 }
+
+/// Old Normal Unit Cached version
+
+/*new PathMoveType
+(
+    new Vector2[][] 
+    { 
+        new Vector2[] 
+        { 
+            vec(1, 2) 
+        }, 
+        new Vector2[] 
+        { 
+            vec(-1, 3) 
+        }
+    }, 
+    new Vector2[][] 
+    { 
+        new Vector2[] 
+        { 
+            vec(1, 0), vec(1, 1) 
+        }, 
+        new Vector2[] 
+        { 
+            vec(-1, 1), vec(-1, 2) 
+        } 
+    }
+), 
+new JumpMoveType
+(
+    new Vector2[] 
+    { 
+        vec(0, 1), vec(0, -1) 
+    }
+) */

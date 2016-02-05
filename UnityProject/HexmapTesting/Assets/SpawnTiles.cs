@@ -40,7 +40,8 @@ public enum RelativeDirection
     BACKWARD_RIGHT,
     BACKWARD,
     BACKWARD_LEFT,
-    FORWARD_LEFT
+    FORWARD_LEFT,
+    NONE
 };
 
 //Absolute
@@ -51,7 +52,8 @@ public enum AbsoluteDirection
     DOWN_RIGHT,
     DOWN,
     DOWN_LEFT,
-    UP_LEFT
+    UP_LEFT,
+    NONE
 };
 
 public class SpawnTiles : MonoBehaviour {
@@ -232,7 +234,13 @@ public class SpawnTiles : MonoBehaviour {
         new Vector2(7, 8)
     };
 
-
+    public AbsoluteDirection[] tempTeamDirections =
+    {
+        AbsoluteDirection.UP,
+        AbsoluteDirection.DOWN
+    };
+    //private AbsoluteDirection tempTeam0Direction = AbsoluteDirection.UP;
+    //private AbsoluteDirection tempTeam1Direction = AbsoluteDirection.DOWN;
 
     public void initialize()
     {
@@ -321,6 +329,7 @@ public class SpawnTiles : MonoBehaviour {
             if (getTileFromHexCoord(tempTeam0SpawnPoints[i]) != null)
             {
                 getTileFromHexCoord(tempTeam0SpawnPoints[i]).teamSpawnLoc = 0;
+                getTileFromHexCoord(tempTeam0SpawnPoints[i]).teamSpawnDirection = tempTeamDirections[0];
             }
         }
 
@@ -329,6 +338,7 @@ public class SpawnTiles : MonoBehaviour {
             if (getTileFromHexCoord(tempTeam1SpawnPoints[i]) != null)
             {
                 getTileFromHexCoord(tempTeam1SpawnPoints[i]).teamSpawnLoc = 1;
+                getTileFromHexCoord(tempTeam1SpawnPoints[i]).teamSpawnDirection = tempTeamDirections[1];
             }
         }
     }
@@ -529,6 +539,46 @@ public class SpawnTiles : MonoBehaviour {
         return true;
     }
 
+    public static AbsoluteDirection getDirectionToTile(HexTile fromTile, HexTile toTile)
+    {
+        return getDirectionToTile(fromTile.getCoords(), toTile.getCoords());
+    }
+
+    public static AbsoluteDirection getDirectionToTile(Vector2 fromPos, Vector2 toPos)
+    {
+        //Vector2 fromCoords = new Vector2(0,0);
+        Vector2 relCoords = toPos - fromPos;
+
+        if (relCoords[0] == 0 && relCoords[1] == 0)
+        {
+            return AbsoluteDirection.NONE;
+        }
+
+        int relSigns0 = (int)(relCoords[0]/Mathf.Abs(relCoords[0]));
+        int relSigns1 = (int)(relCoords[1]/Mathf.Abs(relCoords[1]));
+
+        if (relCoords[0] == 0)
+            if (relSigns1 == 1)
+                return AbsoluteDirection.UP;
+            else
+                return AbsoluteDirection.DOWN;
+        
+        if (relCoords[1] == 0)
+            if (relSigns0 == 1)
+                return AbsoluteDirection.UP_RIGHT;
+            else
+                return AbsoluteDirection.DOWN_LEFT;
+
+        if (Mathf.Abs(relCoords[0]) == Mathf.Abs(relCoords[1]))
+            if (relSigns0 == 1)
+                return AbsoluteDirection.DOWN_RIGHT;
+            else
+                return AbsoluteDirection.UP_LEFT;
+
+        return AbsoluteDirection.NONE;
+
+    }
+
     public static AbsoluteDirection relativeToAbsoluteDirection(AbsoluteDirection currentDirection, RelativeDirection relativeDirection)
     {
         int currentDirIdx = (int)currentDirection;
@@ -584,10 +634,10 @@ public class SpawnTiles : MonoBehaviour {
 
     public static Vector2 absoluteDirectionToRelativePos(AbsoluteDirection rot)
     {
-        return rotationDirectionToObject(rot).getUpDirection();
+        return absoluteDirectionToObject(rot).getUpDirection();
     }
 
-    public static RotationDirectionObject rotationDirectionToObject(AbsoluteDirection rot)
+    public static RotationDirectionObject absoluteDirectionToObject(AbsoluteDirection rot)
     {
         switch (rot)
         {
@@ -615,7 +665,7 @@ public class SpawnTiles : MonoBehaviour {
 
     public static Vector2 rotate(Vector2 originalRelativeLocation, AbsoluteDirection rotationTo)
     {
-        RotationDirectionObject rotDirObj = rotationDirectionToObject(rotationTo);
+        RotationDirectionObject rotDirObj = absoluteDirectionToObject(rotationTo);
 
         return rotDirObj.getUpDirection() * originalRelativeLocation.y + rotDirObj.getRightDirection() * originalRelativeLocation.x;
     }

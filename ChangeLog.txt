@@ -1,6 +1,23 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.6 ]
+Author: Tim Bader
+- Redid the NormalMoveType into PathMoveType
+- PathMoveType now allows the pathing to be in-order (of list position) that once blocked doesnt allow for subsequent positions to be moved to
+- PathMoveType also contains a inner-class that acts to hold a position and a corresponding "can move to" variable called PathPos
+- Implemented spawning the spawning guards rotation
+- Redid the system that doesnt allow just spawned units to move right after spawning, that fixed a bug
+- Any moves that require a direction now take RelativeDirections instead of an interpreted adjacent hex position.
+
+*Extra
+- Added a quick PathMoveType::PathPos creation function to the place where characters are created for easier creation
+- Fixed a bug with Charge Move where the code was not correct and made no sense
+- Created a function to get a direction to a certain tile, that returns none if it is not in any particular direction
+- Fixed Charge Move from simply deleting all other units even if it is not in the correct charge path
+- Now the Charge and Slide move can move with indefinite range if set with a range of -1
+- Fixed a Ranged Checking Move bug
+
 [ v0.0.5 ]
 Author: Tim Bader
 - Added zoom functionality, with adjustable attributes

@@ -3,9 +3,6 @@ C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\Assembly-CShar
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\Assembly-CSharp.pdb
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\Mono.Cecil.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEditor.dll
-C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEditor.iOS.Extensions.Xcode.dll
-C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Advertisements.dll
-C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Analytics.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Networking.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.UI.dll
@@ -18,9 +15,7 @@ C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\Mono.Cecil.Pdb
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\Mono.Cecil.Mdb.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.xml
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEditor.xml
-C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Advertisements.xml
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.UI.xml
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Networking.xml
-C:\Users\Tim\Documents\UnityProjects\HexmapTesting\Temp\bin\Debug\UnityEngine.Analytics.xml
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\obj\Debug\Assembly-CSharp.dll
 C:\Users\Tim\Documents\UnityProjects\HexmapTesting\obj\Debug\Assembly-CSharp.pdb
