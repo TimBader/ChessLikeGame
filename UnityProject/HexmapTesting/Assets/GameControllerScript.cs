@@ -46,7 +46,7 @@ public class GameControllerScript : MonoBehaviour
 
     public Camera mainCamera;
 
-    private float minZoomSize = 1.0f;
+    private float minZoomSize = 0.5f;
     private float maxZoomSize = 6.0f;
     private float zoomRate = 2.0f;
 
@@ -187,6 +187,13 @@ public class GameControllerScript : MonoBehaviour
         AbsoluteDirection ab = SpawnTiles.getDirectionToTile(tileControllerScript.getTileFromHexCoord(new Vector2(3,3)),tileControllerScript.getTileFromHexCoord(new Vector2(2,-1)));
         print("TESTING: " + ab);*/
 
+        spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 1)), 1, false, AbsoluteDirection.UP);
+
         enableInteraction();
 
 
@@ -295,6 +302,13 @@ public class GameControllerScript : MonoBehaviour
                 if (newZoom >= minZoomSize && newZoom <= maxZoomSize )
 
                 mainCamera.orthographicSize = newZoom;
+            }
+
+            if (Input.GetButtonDown("q"))
+            {
+                Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                print("HexCoord at Mouse Position: " + tileControllerScript.pixelCoordToHex(new Vector2(mpos.x, mpos.y)));
+                
             }
 
         }
@@ -1011,17 +1025,17 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit Movement
     void selectingUnitMovement(HexTile clickedTile)
     {
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE || clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
-        {
-            selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
-
-        }
-        else if (clickedTile.getOccupyingUnit())
+        if (clickedTile.getCurrentTileState() == TileState.SELECTED)
         {
             if (selectedUnit == clickedTile.getOccupyingUnit())
             {
                 switchInteractionState(InteractionStates.SelectingUnitToMove);
             }
+        }
+        else if (clickedTile.getCurrentTileState() != TileState.NONE)
+        {
+            selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
+
         }
     }
 

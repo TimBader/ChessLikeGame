@@ -31,8 +31,6 @@ public class HexTile : MonoBehaviour {
     private SpriteRenderer spriteRendererRef = null;
     private TileState currentState = TileState.NONE;
 
-
-
     public void initialize()
     {
         spriteRendererRef = GetComponent<SpriteRenderer>();

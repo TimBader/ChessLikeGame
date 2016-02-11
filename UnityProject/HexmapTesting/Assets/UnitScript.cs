@@ -52,7 +52,7 @@ public class UnitScript : MonoBehaviour {
         {
             throw new UnityException("Dude... you need two childern of a unit with spriterenders in them... re-attach them please");
         }
-        unitInfo = info;
+        unitInfo = info.clone();
         baseSpriteRenderer = list[0];
         color0SpriteRenderer = list[1];
         color1SpriteRenderer = list[2];
@@ -82,6 +82,10 @@ public class UnitScript : MonoBehaviour {
             getColor3SpriteRenderer().sprite = SpriteResourceManager.loadSprite(info.color3SpriteName);
         }
 
+        /*for (int i = 0; i < unitInfo.movementObjects.Count; i++)
+        {
+            unitInfo.movementObjects[i] = unitInfo.movementObjects[i].clone();//Create unit's own movementtype
+        }*/
 
         if (team >= 0)
         {
@@ -138,10 +142,10 @@ public class UnitScript : MonoBehaviour {
 
     public void setRotationDirection(AbsoluteDirection rotationDir)
     {
-        rotationDirection = rotationDir;
-
+        //print(unitInfo.baseSpriteName)
         if (unitInfo.rotationEnabled)
         {
+            rotationDirection = rotationDir;
             if (rotationIndicator)
             {
                 // Rotation Indicator
@@ -152,7 +156,16 @@ public class UnitScript : MonoBehaviour {
 
                 rotationIndicator.transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(q.x, q.y) * 180.0f/Mathf.PI - 90.0f, new Vector3(0.0f,0.0f,-1.0f));
             }
+
+            for (int i = 0; i < unitInfo.movementObjects.Count; i++)
+            {
+                unitInfo.movementObjects[i].unitRotated(rotationDir);
+            }
         }
+        /*else
+        {
+            throw new UnityException(unitInfo.unitName + " cannot rotate but rotate function was called on it");
+        }*/
     }
 
     public AbsoluteDirection getRotation()

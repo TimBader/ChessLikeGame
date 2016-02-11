@@ -8,7 +8,8 @@ public enum MovementTypes
     Jump,
     Slide,
     Charge,
-    Ranged
+    Ranged,
+    Reposition
 }
 
 //!!!!! Always make sure each does not have a relative position/direction of (0,0)
@@ -31,6 +32,12 @@ public abstract class MovementTypeParent
     public abstract void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, int currentTeam);
 
     public abstract bool canMove(UnitScript selectedUnit, int currentTeam);
+
+    public abstract void unitRotated(AbsoluteDirection direction);
+
+    public abstract MovementTypeParent clone();
+
+    public abstract void verifyMove();
 
     public static bool testForInvalidPositions(List<Vector2> positionsList)
     {
@@ -67,7 +74,7 @@ public abstract class MovementTypeParent
 
 
 //******************************************************************************************************************************************************************************************************************
-        //  ------  Normal  ------  //
+        //  ------  Path  ------  //
 //******************************************************************************************************************************************************************************************************************
 
 public class PathMoveType : MovementTypeParent
@@ -87,12 +94,13 @@ public class PathMoveType : MovementTypeParent
     };
 
     public List<List<PathPos>> pathList = new List<List<PathPos>>();
+    public List<List<PathPos>> adjustedPathList = new List<List<PathPos>>();
 
-    public PathMoveType(PathPos[][] paths)
+    public PathMoveType(PathPos[][] paths, bool verify=false)
     {
-        pathList = new List<List<PathPos>>();
-
         movementType = MovementTypes.Path;
+
+        pathList = new List<List<PathPos>>();
         
         for (int i = 0; i < paths.Length; i++)
         {
@@ -100,42 +108,26 @@ public class PathMoveType : MovementTypeParent
             pathList.Add(Util.toList(paths[i]));
         }
 
+        if (verify)
+        {
+            verifyMove();
+        }
 
-        bool foundOne = false;
-        for (int i = 0; i < pathList.Count; i++)
-        {
-            for (int j = 0; j < pathList[i].Count; j++)
-            {
-                if (paths[i][j].moveable)
-                {
-                    foundOne = true;
-                    break;
-                }
-            }
-            if (foundOne)
-                break;
-        }
-        if (!foundOne)
-        {
-            throw new UnityException("Issue: Was unable to find a position in a PathMoveType is set to moveable");
-        }
+        unitRotated(AbsoluteDirection.UP);
     }
 
 
+    public PathMoveType(List<List<PathPos>> paths, bool verify=false)
+    {
+        movementType = MovementTypes.Path;
+
+        pathList = paths;
+
+        unitRotated(AbsoluteDirection.UP);
+    }
+
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
-        //Adjusting Positions
-        List<List<PathPos>> adjustedPathList = new List<List<PathPos>>();
-        for (int i = 0; i < pathList.Count; i++ )
-        {
-            List<PathPos> pathPart = new List<PathPos>();
-            for (int j = 0; j < pathList[i].Count; j++)
-            {
-                pathPart.Add(new PathPos(SpawnTiles.rotate(pathList[i][j].pos, selectedUnit.getRotation()), pathList[i][j].moveable));
-            }
-            adjustedPathList.Add(pathPart);
-        }
-
         //MarkingEm
         for (int i = 0; i < adjustedPathList.Count; i++ )
         {
@@ -196,35 +188,20 @@ public class PathMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            {
+                gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            }
+
+            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
-
-        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
-        //switchToNextTeam();
-        //gameControllerRef.altCounter = 0;
-
-        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)
     {
-        //Adjusting Positions
-        List<List<PathPos>> adjustedPathList = new List<List<PathPos>>();
-        for (int i = 0; i < pathList.Count; i++)
-        {
-            List<PathPos> pathPart = new List<PathPos>();
-            for (int j = 0; j < pathList[i].Count; j++)
-            {
-                pathPart.Add(new PathPos(SpawnTiles.rotate(pathList[i][j].pos, selectedUnit.getRotation()), pathList[i][j].moveable));
-            }
-            adjustedPathList.Add(pathPart);
-        }
-
-        gameControllerRef.printString("" + adjustedPathList.Count);
-
         //Checking Em
         for (int i = 0; i < adjustedPathList.Count; i++)
         {
@@ -261,6 +238,50 @@ public class PathMoveType : MovementTypeParent
         //gameControllerRef.printString("Found no blocking nor place to move to in PathMoveType");
         return false;
     }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        //Adjusting Positions
+        adjustedPathList = new List<List<PathPos>>();
+        for (int i = 0; i < pathList.Count; i++)
+        {
+            List<PathPos> pathPart = new List<PathPos>();
+            for (int j = 0; j < pathList[i].Count; j++)
+            {
+                pathPart.Add(new PathPos(SpawnTiles.rotate(pathList[i][j].pos, direction), pathList[i][j].moveable));
+            }
+            adjustedPathList.Add(pathPart);
+        }
+    }
+
+    public override void verifyMove()
+    {
+        bool foundOne = false;
+        for (int i = 0; i < pathList.Count; i++)
+        {
+            for (int j = 0; j < pathList[i].Count; j++)
+            {
+                if (pathList[i][j].moveable)
+                {
+                    foundOne = true;
+                    break;
+                }
+            }
+            if (foundOne)
+                break;
+        }
+        if (!foundOne)
+        {
+            throw new UnityException("Issue: Was unable to find a position in a PathMoveType is set to moveable");
+        }
+
+        //throw new System.NotImplementedException();
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new PathMoveType(pathList);
+    }
 }
 
 
@@ -272,27 +293,37 @@ public class PathMoveType : MovementTypeParent
 public class JumpMoveType : MovementTypeParent
 {
     public List<Vector2> jumpPositions = new List<Vector2>();
+    public List<Vector2> adjustedJumpPositions = new List<Vector2>();
 
-    public JumpMoveType(Vector2[] jumpMovementPositions)
+    public JumpMoveType(Vector2[] jumpMovementPositions, bool verify=false)
     {
         jumpPositions = Util.toList(jumpMovementPositions);
         movementType = MovementTypes.Jump;
 
-        if (!testForInvalidPositions(jumpPositions))
+        if (verify)
         {
-            throw new UnityException("Jump Locations have an invalid positions (0,0)");
+            verifyMove();
         }
+
+        unitRotated(AbsoluteDirection.UP);
+    }
+
+    public JumpMoveType(List<Vector2> jumpMovementPositions, bool verify = false)
+    {
+        jumpPositions = jumpMovementPositions;
+        movementType = MovementTypes.Jump;
+
+        if (verify)
+        {
+            verifyMove();
+        }
+
+        unitRotated(AbsoluteDirection.UP);
     }
 
 
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
-        List<Vector2> adjustedJumpPositions = new List<Vector2>();
-        for (int i = 0; i < jumpPositions.Count; i++)
-        {
-            adjustedJumpPositions.Add(SpawnTiles.rotate(jumpPositions[i], selectedUnit.getRotation()));
-        }
-
         for (int i = 0; i < adjustedJumpPositions.Count; i++)
         {
             HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(adjustedJumpPositions[i] + selectedUnit.getOccupyingHex().getCoords());
@@ -321,15 +352,18 @@ public class JumpMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            {
+                gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            }
+
+            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+            //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+
+            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
-
-        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
-
-        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
 
@@ -337,7 +371,7 @@ public class JumpMoveType : MovementTypeParent
     {
         for (int i = 0; i < jumpPositions.Count; i++ )
         {
-            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(jumpPositions[i], selectedUnit.getRotation()));
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedJumpPositions[i]);
             if (tile)
             {
                 if (tile.getOccupyingUnit())
@@ -355,6 +389,28 @@ public class JumpMoveType : MovementTypeParent
         }
         return false;
     }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        adjustedJumpPositions = new List<Vector2>();
+        for (int i = 0; i < jumpPositions.Count; i++)
+        {
+            adjustedJumpPositions.Add(SpawnTiles.rotate(jumpPositions[i], direction));
+        }
+    }
+
+    public override void verifyMove()
+    {
+        if (!testForInvalidPositions(jumpPositions))
+        {
+            throw new UnityException("Jump Locations have an invalid positions (0,0)");
+        }
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new JumpMoveType(jumpPositions);
+    }
 };
 
 
@@ -366,44 +422,39 @@ public class JumpMoveType : MovementTypeParent
 public class SlideMoveType : MovementTypeParent
 {
     public List<RelativeDirection> directions = new List<RelativeDirection>();
+    public List<Vector2> adjustedDirections = new List<Vector2>();
     public List<int> ranges = new List<int>(); //-1 for infinite range
 
-    public SlideMoveType(RelativeDirection[] slideDirections, int[] slideRanges)
+    public SlideMoveType(RelativeDirection[] slideDirections, int[] slideRanges, bool verify=false)
     {
-        //initialize(Util.toList(slideDirections), Util.toList(slideRanges));
-
         directions = Util.toList(slideDirections);
         ranges = Util.toList(slideRanges);
         movementType = MovementTypes.Slide;
 
-        if (directions.Count != ranges.Count)
+        if (verify)
         {
-            throw new UnityException("The amount of Slide Directions do not match the amount of slide ranges");
+            verifyMove();
         }
 
-        List<RelativeDirection> tempList = new List<RelativeDirection>();
-        for (int i = 0; i < ranges.Count; i++ )
-        {
-            if (ranges[i] < -1 || ranges[i] == 0)
-            {
-                throw new UnityException("Slide Ranges has an invalid range (< -1) || (= 0)");
-            }
+        unitRotated(AbsoluteDirection.UP);
+    }
 
-            if (tempList.Contains(directions[i]))
-            {
-                throw new UnityException("Slide Directions must not be repeated");
-            }
+    public SlideMoveType(List<RelativeDirection> slideDirections, List<int> slideRanges, bool verify = false)
+    {
+        directions = slideDirections;
+        ranges = slideRanges;
+        movementType = MovementTypes.Slide;
+
+        if (verify)
+        {
+            verifyMove();
         }
+
+        unitRotated(AbsoluteDirection.UP);
     }
 
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
-        List<Vector2> adjustedDirections = new List<Vector2>();
-        for (int i = 0; i < directions.Count; i++)
-        {
-            adjustedDirections.Add( SpawnTiles.absoluteDirectionToObject( SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), directions[i]) ).getUpDirection() );
-        }
-
         for (int i = 0; i < adjustedDirections.Count; i++)
         {
             int j = 0;
@@ -453,23 +504,26 @@ public class SlideMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            {
+                gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            }
+
+            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+            //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+            //switchToNextTeam();
+
+            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
-
-        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
-        //switchToNextTeam();
-
-        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)
     {
         for (int i = 0; i < directions.Count; i++ )
         {
-            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToObject(SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), directions[i])).getUpDirection());
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedDirections[i]);
             if (tile)
             {
                 if (tile.getOccupyingUnit())
@@ -488,6 +542,42 @@ public class SlideMoveType : MovementTypeParent
 
         return false;
     }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        adjustedDirections = new List<Vector2>();
+        for (int i = 0; i < directions.Count; i++)
+        {
+            adjustedDirections.Add(SpawnTiles.absoluteDirectionToObject(SpawnTiles.relativeToAbsoluteDirection(direction, directions[i])).getUpDirection());
+        }
+    }
+
+    public override void verifyMove()
+    {
+        if (directions.Count != ranges.Count)
+        {
+            throw new UnityException("The amount of Slide Directions do not match the amount of slide ranges");
+        }
+
+        List<RelativeDirection> tempList = new List<RelativeDirection>();
+        for (int i = 0; i < ranges.Count; i++)
+        {
+            if (ranges[i] < -1 || ranges[i] == 0)
+            {
+                throw new UnityException("Slide Ranges has an invalid range (< -1) || (= 0)");
+            }
+
+            if (tempList.Contains(directions[i]))
+            {
+                throw new UnityException("Slide Directions must not be repeated");
+            }
+        }
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new SlideMoveType(directions, ranges);
+    }
 }
 
 
@@ -499,78 +589,50 @@ public class SlideMoveType : MovementTypeParent
 public class ChargeMoveType : MovementTypeParent
 {
     public List<RelativeDirection> directions = new List<RelativeDirection>();
+    public List<Vector2> adjustedDirections = new List<Vector2>();
     public List<int> ranges = new List<int>(); //-1 for infinite range
     public List<uint> blockingExtent = new List<uint>();
 
-    public ChargeMoveType(RelativeDirection[] slideDirections, int[] slideRanges, uint[] blockExtent)
+    public ChargeMoveType(RelativeDirection[] slideDirections, int[] slideRanges, uint[] blockExtent, bool verify=false)
     {
-        //None should be in the same direction, check for that
-        //initialize(Util.toList(slideDirections), Util.toList(slideRanges), Util.toList(blockExtent));
-
         directions = Util.toList(slideDirections);
         ranges = Util.toList(slideRanges);
         blockingExtent = Util.toList(blockExtent);
 
-        int listSize = directions.Count;
-        if (listSize != ranges.Count)
+        if (verify)
         {
-            throw new UnityException("The amount of Slide Ranges do not match the amount of Slide Directions");
-        }
-        if (listSize != blockingExtent.Count)
-        {
-            throw new UnityException("The amount of Block Extents do not match the amount of Slide Directions");
-        }
-        /*if (!SpawnTiles.checkValidAdjacency(slideDirections))
-        {
-            throw new UnityException("Slide Directions has a non adjacent position");
-        }*/
-        List<RelativeDirection> tempList = new List<RelativeDirection>();
-
-        for (int i = 0; i < listSize; i++)
-        {
-            if (slideRanges[i] < -1 || slideRanges[i] == 0)
-            {
-                throw new UnityException("Charge Ranges has an invalid range (< -1) || (= 0)");
-            }
-            if (blockExtent[i] <= 0)
-            {
-                throw new UnityException("Block Extent has an invalid range (<= 0)");
-            }
-            if (blockExtent[i] >= slideRanges[i] && slideRanges[i] != -1)
-            {
-                throw new UnityException("Block Extent has an invalid range (>= slideRanges at index)");
-            }
-            if (tempList.Contains(directions[i]))
-            {
-                throw new UnityException("Directions must never be repeated");
-            }
-            else
-            {
-                tempList.Add(directions[i]);
-            }
+            verifyMove();
         }
 
         movementType = MovementTypes.Charge;
+        unitRotated(AbsoluteDirection.UP);
+    }
+
+    public ChargeMoveType(List<RelativeDirection> slideDirections, List<int> slideRanges, List<uint> blockExtent, bool verify=false)
+    {
+        directions = slideDirections;
+        ranges = slideRanges;
+        blockingExtent = blockExtent;
+
+        if (verify)
+        {
+            verifyMove();
+        }
+
+        movementType = MovementTypes.Charge;
+        unitRotated(AbsoluteDirection.UP);
     }
 
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
-        List<Vector2> calculatedDirs = new List<Vector2>();
-
-        for (int i = 0; i < directions.Count; i++)
-        {
-            calculatedDirs.Add( SpawnTiles.absoluteDirectionToObject( SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), directions[i]) ).getUpDirection() );
-            //adjustedDirs.Add(SpawnTiles.rotate(directions[i], selectedUnit.getRotation()));
-        }
-
-        for (int i = 0; i < calculatedDirs.Count; i++)
+        for (int i = 0; i < adjustedDirections.Count; i++)
         {
             HexTile currentTile = selectedUnit.getOccupyingHex();
             HexTile prevTile = null;
             int j = 0;
             while (j <= ranges[i] || ranges[i] == -1/*For infinite range (Mabye it works)*/)
             {
-                currentTile = gameControllerRef.getTileController().getTileFromHexCoord(currentTile.getCoords() + calculatedDirs[i]);
+                currentTile = gameControllerRef.getTileController().getTileFromHexCoord(currentTile.getCoords() + adjustedDirections[i]);
                 if (j >= blockingExtent[i])
                 {
                     if (currentTile)
@@ -640,7 +702,7 @@ public class ChargeMoveType : MovementTypeParent
             int pos = -1;
             for (int i = 0; i < directions.Count; i++ )
             {
-                if (posDir == SpawnTiles.absoluteDirectionToObject( SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), directions[i])).getUpDirection() )
+                if (posDir == adjustedDirections[i] )
                 {
                     pos = i;
                     break;
@@ -681,7 +743,7 @@ public class ChargeMoveType : MovementTypeParent
         {
             bool good = true;
             //Plus one since we need to see if the one after the blocking exent is avialiable
-            Vector2 currentDirection = SpawnTiles.absoluteDirectionToObject(SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), directions[i])).getUpDirection();
+            Vector2 currentDirection = adjustedDirections[i];
             HexTile tile = null;
             //Starts at one since you dont want to check against self :P
             for (int j = 1; j <= blockingExtent[i]; j++ )
@@ -723,70 +785,172 @@ public class ChargeMoveType : MovementTypeParent
 
         return false;
     }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        adjustedDirections = new List<Vector2>();
+
+        for (int i = 0; i < directions.Count; i++)
+        {
+            adjustedDirections.Add(SpawnTiles.absoluteDirectionToObject(SpawnTiles.relativeToAbsoluteDirection(direction, directions[i])).getUpDirection());
+            //adjustedDirs.Add(SpawnTiles.rotate(directions[i], selectedUnit.getRotation()));
+        }
+    }
+
+    public override void verifyMove()
+    {
+        int listSize = directions.Count;
+        if (listSize != ranges.Count)
+        {
+            throw new UnityException("The amount of Slide Ranges do not match the amount of Slide Directions");
+        }
+        if (listSize != blockingExtent.Count)
+        {
+            throw new UnityException("The amount of Block Extents do not match the amount of Slide Directions");
+        }
+
+        List<RelativeDirection> tempList = new List<RelativeDirection>();
+
+        for (int i = 0; i < listSize; i++)
+        {
+            if (ranges[i] < -1 || ranges[i] == 0)
+            {
+                throw new UnityException("Charge Ranges has an invalid range (< -1) || (= 0)");
+            }
+            if (blockingExtent[i] <= 0)
+            {
+                throw new UnityException("Block Extent has an invalid range (<= 0)");
+            }
+            if (blockingExtent[i] >= ranges[i] && ranges[i] != -1)
+            {
+                throw new UnityException("Block Extent has an invalid range (>= slideRanges at index)");
+            }
+            if (tempList.Contains(directions[i]))
+            {
+                throw new UnityException("Directions must never be repeated");
+            }
+            else
+            {
+                tempList.Add(directions[i]);
+            }
+        }
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new ChargeMoveType(directions, ranges, blockingExtent);
+    }
 }
 
 
 
 //******************************************************************************************************************************************************************************************************************
-//  ------  Ranged  ------  //
+    //  ------  Ranged  ------  //
 //******************************************************************************************************************************************************************************************************************
 
 public class RangedMoveType : MovementTypeParent
 {
-    public List<Vector2> relativeLocations = new List<Vector2>();
+    public List<List<Vector2>> relativeLocations = new List<List<Vector2>>();
+    public List<List<Vector2>> adjustedLocations = new List<List<Vector2>>();
 
-    public RangedMoveType(Vector2[] relativeLocs)
+    public RangedMoveType(Vector2[][] relativeLocs, bool verify=false)
     {
+        for (int i = 0; i < relativeLocs.Length; i++ )
+        {
+            relativeLocations.Add(Util.toList(relativeLocs[i]));
+        }
 
-        relativeLocations = Util.toList(relativeLocs);
         movementType = MovementTypes.Ranged;
 
-        if (!testForInvalidPositions(relativeLocations))
+        if (verify)
         {
-            throw new UnityException("Relative Locs has an invalid location (0,0)");
+            verifyMove();
         }
+
+        unitRotated(AbsoluteDirection.UP);
+    }
+
+    public RangedMoveType(List<List<Vector2>> relativeLocs, bool verify = false)
+    {
+        for (int i = 0; i < relativeLocs.Count; i++)
+        {
+            relativeLocations.Add(relativeLocs[i]);
+        }
+
+        movementType = MovementTypes.Ranged;
+
+        if (verify)
+        {
+            verifyMove();
+        }
+
+        unitRotated(AbsoluteDirection.UP);
     }
 
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
-        List<Vector2> adjustedRelPos = new List<Vector2>();
-
-        for (int i = 0; i < relativeLocations.Count; i++)
+        for (int i = 0; i < adjustedLocations.Count; i++)
         {
-            adjustedRelPos.Add(SpawnTiles.rotate(relativeLocations[i], selectedUnit.getRotation()));
-        }
-
-        for (int i = 0; i < relativeLocations.Count; i++)
-        {
-            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedRelPos[i]);
-            if (tile)
+            for (int j = 0; j < adjustedLocations[i].Count; j++)
             {
-                if (tile.getOccupyingUnit())
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][j]);
+                if (tile)
                 {
-                    if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                    if (tile.getOccupyingUnit())
                     {
-                        tile.switchState(TileState.ATTACKABLE);
+                        if (tile.getOccupyingUnit().getTeam() != currentTeam)
+                        {
+                            for (int k = 0; k < relativeLocations[i].Count; k++ )
+                            {
+                                HexTile tile2 = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][k]);
+                                if (tile2)
+                                {
+                                    tile2.switchState(TileState.ATTACKABLE);
+                                }
+                                tile2.switchState(TileState.ATTACKABLE);
+                            }
+                            break;
+                        }
+                        else
+                        {
+                            tile.switchState(TileState.NONSELECTABLE);
+                            //tile.switchState(TileState.MOVEABLE);
+                        }
                     }
                     else
                     {
-                        tile.switchState(TileState.NONSELECTABLE);
                         //tile.switchState(TileState.MOVEABLE);
+                        tile.switchState(TileState.NONSELECTABLE);
                     }
-                }
-                else
-                {
-                    //tile.switchState(TileState.MOVEABLE);
-                    tile.switchState(TileState.NONSELECTABLE);
                 }
             }
         }
     }
 
-    public override void clickedInMode(HexTile clickedTile, UnitScript selecetdUnit, int currentTeam)
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
+
         if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
         {
-            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
+            Vector2 tileLoc = clickedTile.getCoords();
+
+            for (int i = 0; i < adjustedLocations.Count; i++ )
+            {
+                if (adjustedLocations[i].Contains(tileLoc - selectedUnit.getCoords()))
+                {
+                    for (int j = 0; j < adjustedLocations[i].Count; j++)
+                    {
+                        HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedLocations[i][j]);
+                        if (tile.getOccupyingUnit())
+                        {
+                            if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                            {
+                                gameControllerRef.captureUnit(tile.getOccupyingUnit()); 
+                            }
+                        }
+                    }
+                }
+            }
 
             gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
@@ -796,13 +960,265 @@ public class RangedMoveType : MovementTypeParent
     {
         for (int i = 0; i < relativeLocations.Count; i++ )
         {
-            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(relativeLocations[i], selectedUnit.getRotation()));
-            if (tile)
+            for (int j = 0; j < relativeLocations[i].Count; j++)
             {
-                return true;
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][j]);
+                if (tile)
+                {
+                    if (tile.getOccupyingUnit())
+                    {
+                        if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
+    }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        adjustedLocations = new List<List<Vector2>>();
+
+        for (int i = 0; i < relativeLocations.Count; i++)
+        {
+            List<Vector2> relPos = new List<Vector2>();
+            for (int j = 0; j < relativeLocations[i].Count; j++)
+            {
+                relPos.Add(SpawnTiles.rotate(relativeLocations[i][j], direction));
+            }
+            adjustedLocations.Add(relPos);
+        }
+    }
+
+    public override void verifyMove()
+    {
+        HashSet<Vector2> tempSet = new HashSet<Vector2>();
+        Vector2 zeroVec = new Vector2(0, 0);
+        for (int i = 0; i < relativeLocations.Count; i++)
+        {
+            for (int j = 0; j < relativeLocations[i].Count; j++)
+            {
+                if (relativeLocations[i][j] == zeroVec)
+                {
+                    throw new UnityException("A relative locations is an invalid location (0,0)");
+                }
+                if (!tempSet.Contains(relativeLocations[i][j]))
+                {
+                    tempSet.Add(relativeLocations[i][j]);
+                }
+                else
+                {
+                    throw new UnityException("A relative location is repeated in this RangedMove");
+                }
+            }
+        }
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new RangedMoveType(relativeLocations);
+    }
+}
+
+
+//******************************************************************************************************************************************************************************************************************
+    //  ------  Reposition  ------  //
+//******************************************************************************************************************************************************************************************************************
+
+public class RepositionMoveType : MovementTypeParent
+{
+    public List<Vector2> selectableLocations = new List<Vector2>();
+    public List<Vector2> adjustedSelectableLocations = new List<Vector2>();
+    public List<Vector2> repositionLocations = new List<Vector2>();
+    public List<Vector2> adjustedRepositionLocations = new List<Vector2>();  
+    //public List<List<RelativeDirection>> rotateDirections = new List<List<RelativeDirection>>();
+
+    public int mode = 0;
+    public UnitScript repositioningUnit = null;
+
+    public RepositionMoveType(Vector2[] selectableLocs, Vector2[] repositionLocs, bool verify=false)//, RelativeDirection[][] rotateDirs)
+    {
+        selectableLocations = Util.toList(selectableLocs);
+        repositionLocations = Util.toList(repositionLocs);
+
+        /*for (int i = 0; i < rotateDirs.Length; i++ )
+        {
+            rotateDirections.Add(Util.toList(rotateDirs[i]));
+        }*/
+
+        if (verify)
+        {
+            verifyMove();
+        }
+
+        movementType = MovementTypes.Reposition;
+
+        unitRotated(AbsoluteDirection.UP);
+        //Make Sure Rotations are not the same.
+    }
+
+    public RepositionMoveType(List<Vector2> selectableLocs, List<Vector2> repositionLocs, bool verify=false)//, RelativeDirection[][] rotateDirs)
+    {
+        selectableLocations = selectableLocs;
+        repositionLocations = repositionLocs;
+
+        /*for (int i = 0; i < rotateDirs.Length; i++ )
+        {
+            rotateDirections.Add(Util.toList(rotateDirs[i]));
+        }*/
+
+        if (verify)
+        {
+            verifyMove();
+        }
+
+        movementType = MovementTypes.Reposition;
+
+        unitRotated(AbsoluteDirection.UP);
+        //Make Sure Rotations are not the same.
+    }
+
+    public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
+    {
+        for (int i = 0; i < selectableLocations.Count; i++)
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedSelectableLocations[i]);
+            if (tile)
+            {
+                tile.switchState(TileState.NONSELECTABLE);
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
+                    {
+                        tile.switchState(TileState.SPAWNABLE);
+                    }
+                }
+            }
+        }
+    }
+
+    private void drawMoveableTiles(UnitScript selectedUnit, int currentTeam)
+    {
+        gameControllerRef.getTileController().switchAllTileStates();
+        for (int i = 0; i < repositionLocations.Count; i++)
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
+            if (tile)
+            {
+                tile.switchState(TileState.NONSELECTABLE);
+                if (!tile.getOccupyingUnit())
+                {
+                    tile.switchState(TileState.SELECTABLE);
+                }
+                else if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
+                {
+                    tile.switchState(TileState.SELECTABLE);
+                }
+            }
+        }
+    }
+
+    public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
+    {
+        if (mode == 0)
+        {
+            if (clickedTile.getCurrentTileState() == TileState.SPAWNABLE)
+            {
+                mode = 1;
+                drawMoveableTiles(selectedUnit, currentTeam);
+                repositioningUnit = clickedTile.getOccupyingUnit();
+                return;
+            }
+        }
+
+        if (mode == 1)
+        {
+            if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+            {
+                if (!clickedTile.getOccupyingUnit())
+                {
+                    gameControllerRef.getTileController().transferUnit(repositioningUnit.getOccupyingHex(), clickedTile);
+                }
+                repositioningUnit.setRotationDirection(selectedUnit.getRotation());
+                mode = 0;
+                repositioningUnit = null;
+                gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+            }
+        }
+    }
+
+    public override bool canMove(UnitScript selectedUnit, int currentTeam)
+    {
+        bool good = false;
+        for (int i = 0; i < selectableLocations.Count; i++ )
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedSelectableLocations[i]);
+            if (tile)
+            {
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
+                    {
+                        good = true;
+                        break;
+                    }
+                }
+            }
+        }
+        if (!good)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < repositionLocations.Count; i++)
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
+            if (tile)
+            {
+                if (!tile.getOccupyingUnit())
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public override void unitRotated(AbsoluteDirection direction)
+    {
+        adjustedSelectableLocations = new List<Vector2>();
+        for (int i = 0; i < selectableLocations.Count; i++)
+        {
+            adjustedSelectableLocations.Add(SpawnTiles.rotate(selectableLocations[i], direction));
+        }
+
+        adjustedRepositionLocations = new List<Vector2>();
+        for (int i = 0; i < repositionLocations.Count; i++)
+        {
+            adjustedRepositionLocations.Add(SpawnTiles.rotate(repositionLocations[i], direction));
+        }
+    }
+
+    public override void verifyMove()
+    {
+        if (!testForInvalidPositions(selectableLocations))
+        {
+            throw new UnityException("Selectable Locs has an invalid location (0,0)");
+        }
+
+        if (!testForInvalidPositions(repositionLocations))
+        {
+            throw new UnityException("Selectable Locs has an invalid location (0,0)");
+        }
+    }
+
+    public override MovementTypeParent clone()
+    {
+        return new RepositionMoveType(selectableLocations, repositionLocations);
     }
 }
 

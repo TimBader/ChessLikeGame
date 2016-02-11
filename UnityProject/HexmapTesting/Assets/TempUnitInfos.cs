@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public struct UnitInfo
+/*public struct UnitInfo
 {
     public string unitName;
     public string baseSpriteName;
@@ -13,6 +13,38 @@ public struct UnitInfo
     public List<MovementTypeParent> movementObjects;
     public List<RelativeDirection> relativeRotationDirections;
     public bool rotationEnabled;
+};*/
+
+
+public class UnitInfo
+{
+    public string unitName;
+    public string baseSpriteName;
+    public string color0SpriteName;
+    public string color1SpriteName;
+    public string color2SpriteName;
+    public string color3SpriteName;
+    public List<MovementTypeParent> movementObjects = new List<MovementTypeParent>();
+    public List<RelativeDirection> relativeRotationDirections = new List<RelativeDirection>();
+    public bool rotationEnabled;
+
+    public UnitInfo clone()
+    {
+        UnitInfo ui = new UnitInfo();
+        ui.unitName = unitName;
+        ui.baseSpriteName = color0SpriteName;
+        ui.color0SpriteName = color1SpriteName;
+        ui.color1SpriteName = color2SpriteName;
+        ui.color2SpriteName = color3SpriteName;
+        for (int i = 0; i < movementObjects.Count; i++)
+        {
+            ui.movementObjects.Add(movementObjects[i].clone());
+        }
+        ui.relativeRotationDirections = relativeRotationDirections;
+        ui.rotationEnabled = rotationEnabled;
+
+        return ui;
+    }
 };
 
 
@@ -40,11 +72,13 @@ public class TempUnitInfos
         LordInfo.unitName = "Lord";
         /*LordInfo.baseSpriteName = "Lord_Base";
         LordInfo.color0SpriteName = "Lord_Colors";*/
-        LordInfo.baseSpriteName = "TestUnit_Base";
+        LordInfo.baseSpriteName = "LordBaseSprite";
+        LordInfo.color0SpriteName = "LordTeamColorSprite";
+        /*LordInfo.baseSpriteName = "TestUnit_Base";
         LordInfo.color0SpriteName = "TestUnit_Color0";
         LordInfo.color1SpriteName = "TestUnit_Color1";
         LordInfo.color2SpriteName = "TestUnit_Color2";
-        LordInfo.color3SpriteName = "TestUnit_Color3";
+        LordInfo.color3SpriteName = "TestUnit_Color3";*/
 
         LordInfo.movementObjects = Util.toList(new MovementTypeParent[]
         {
@@ -53,7 +87,8 @@ public class TempUnitInfos
                 new Vector2[]
                 { 
                     vec(0,-1), vec(1,-1), vec(1,0), vec(0,1), vec(-1,1), vec(-1,0)
-                }
+                },
+                true //Verify Move
             )
         });
         LordInfo.rotationEnabled = false;
@@ -76,8 +111,9 @@ public class TempUnitInfos
                 new Vector2[]
                 { 
                     vec(0,2), vec(1,0), vec(-1,1) 
-                }
-            ) 
+                },
+                true //Verify Move
+            )
         });
         basicUnitInfo.rotationEnabled = true;
         basicUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
@@ -98,17 +134,26 @@ public class TempUnitInfos
         { 
             new RangedMoveType
             (
-                new Vector2[] 
+                new Vector2[][]
                 { 
-                    vec(0, 3) 
-                }
+                    new Vector2[]
+                    {
+                        vec(0, 3), vec(0,4), vec(-1,4), vec(1,3)
+                    },
+                    new Vector2[]
+                    {
+                        vec(1,0), vec(1,-1), vec(2,-1)
+                    }
+                },
+                true //Verify Move
             ), 
             new JumpMoveType
             (
                 new Vector2[]
                 { 
                     vec(0, 1), vec(0,-1)
-                }
+                },
+                true //Verify Move
             )
         });
         rangedUnitInfo.rotationEnabled = true;
@@ -139,7 +184,8 @@ public class TempUnitInfos
                 new int[] 
                 { 
                     -1//3 -1 means infinite range
-                }
+                },
+                true //Verify Move
             ) 
         });
         specialUnitInfo.rotationEnabled = true;
@@ -175,14 +221,16 @@ public class TempUnitInfos
                 { 
                     1
                     //1
-                }
+                },
+                true //Verify Move
             ),
             new JumpMoveType
             (
                 new Vector2[]
                 {
                     vec(1,0), vec(-1,1)
-                }
+                },
+                true //Verify Move
             )
         });
         knightUnitInfo.rotationEnabled = true;
@@ -233,14 +281,16 @@ public class TempUnitInfos
                         pathPos( vec(-1, 3), false),
                         pathPos( vec(0, 3), true)
                     }
-                }
+                },
+                true //Verify Move
             ),
             new JumpMoveType
             (
                 new Vector2[]
                 {
                     vec(1,0), vec(-1,1)
-                }
+                },
+                true //Verify Move
             )
         });
         normalUnitInfo.rotationEnabled = true;
@@ -249,6 +299,60 @@ public class TempUnitInfos
             RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT 
         });
         tempUnitInfos.Add(normalUnitInfo);
+
+
+
+        ////////////////
+        //Reposition Unit
+        ////////////////
+        UnitInfo repositionUnitInfo = new UnitInfo();
+        repositionUnitInfo.unitName = "RepositionUnit";
+        repositionUnitInfo.color0SpriteName = "Diamond_Colors";//Pentagon_Colors
+        repositionUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
+        { 
+            new RepositionMoveType
+            (
+                new Vector2[]
+                {
+                    vec(1,0), vec(0,1), vec(1,-1), vec(0,-1), vec(-1,0), vec(-1,1)
+                },
+                new Vector2[]
+                {
+                    vec(-1,1), vec(0,1), vec(1,0)
+                }/*,// This is something that we may do, it just requires some more effort to implement
+                new RelativeDirection[][]
+                {
+                    new RelativeDirection[]
+                    {
+                        RelativeDirection.FORWARD, RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_RIGHT
+                    },
+                    new RelativeDirection[]
+                    {
+                        RelativeDirection.FORWARD, RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_RIGHT
+                    },
+                    new RelativeDirection[]
+                    {
+                        RelativeDirection.FORWARD, RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_RIGHT
+                    }
+                }*/,
+                true //Verify Move
+            ),
+            new JumpMoveType
+            (
+                new Vector2[]
+                {
+                    vec(1,0), vec(0,1), vec(1,-1), vec(0,-1), vec(-1,0), vec(-1,1)
+                },
+                true //Verify Move
+            )
+        });
+        repositionUnitInfo.rotationEnabled = true;
+        repositionUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
+        { 
+            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT 
+        });
+        tempUnitInfos.Add(repositionUnitInfo);
+
 
     }
 

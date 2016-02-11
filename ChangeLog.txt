@@ -1,6 +1,26 @@
 Chess-Like Game Change Log
 ------
 
+
+[ v0.0.7 ]
+Author: Tim Bader
+- Added RepositionUnit as an example
+- Added the reposition move to the pool
+- Added the debugging ability to see what hex coord is under the mouse by pressing "q"
+- Redid the Ranged Move Type to allow for multiple attack tiles that are also manually grouped
+- Redid Ranged Unit to demonstrate the new Ranged Move Type
+- Movetypes cache data to help improve performance and code cleanness
+- When a unit rotates it tells all of its move types that it did for those movetypes to re-cache what ever they need to
+- Units get their own personal UnitInfo class that is cloned from the created ones in TempUnitInfo
+- MoveTypes now have clone, verify, and new constructor
+- All move types have in their constructor the ability to verify the data to see if it is clear... this should happen when you first create the info in TempUnitInfo Section
+
+*Extra
+- MovementObjects now can have their "ClickedInMode" func be called when any tile has been clicked excluding State NONE and SELECTED
+- Slide / Jump / Path Move can no longer move to a tile that doesnt have state ATTACKABLE or SELECTED
+- Unit Info now stored as a class
+- Redid the first color in the team color pallets for team 0 and team 1
+
 [ v0.0.6 ]
 Author: Tim Bader
 - Redid the NormalMoveType into PathMoveType
