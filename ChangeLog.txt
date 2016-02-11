@@ -1,6 +1,10 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.8 ]
+Author: Tim Bader
+- Allowed the RepositionUnit to spawn
+- Added a reposition unit into the map for quick testing
 
 [ v0.0.7 ]
 Author: Tim Bader

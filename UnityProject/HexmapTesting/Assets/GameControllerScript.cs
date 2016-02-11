@@ -187,6 +187,7 @@ public class GameControllerScript : MonoBehaviour
         AbsoluteDirection ab = SpawnTiles.getDirectionToTile(tileControllerScript.getTileFromHexCoord(new Vector2(3,3)),tileControllerScript.getTileFromHexCoord(new Vector2(2,-1)));
         print("TESTING: " + ab);*/
 
+        spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
         spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 1, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
@@ -981,7 +982,8 @@ public class GameControllerScript : MonoBehaviour
                 "SpecialUnit",
                 "KnightUnit",
                 "NormalUnit",
-                "RangedUnit"
+                "RangedUnit",
+                "RepositionUnit"
             };
 
             selectedUnit = spawnUnit(tempSpawnList[Random.Range(0, tempSpawnList.Length)], clickedTile, currentTeam, true, getTeamController(currentTeam).defaultDirection);
