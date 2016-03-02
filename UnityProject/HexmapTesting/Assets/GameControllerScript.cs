@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public enum InteractionStates
 {
@@ -32,12 +33,14 @@ public class GameControllerScript : MonoBehaviour
 
     private InteractionStates interactionState = InteractionStates.SelectingLordLocation;
     private UnitScript selectedUnit = null;
-    private bool interactionEnabled = false;
+    private bool gameInteractionEnabled = false;
+    private bool uiInteractionEnabled = false;
     private uint numberOfTeams = 2;
     private int currentTeam = 0;
     private List<TeamControllerScript> teamControllers = new List<TeamControllerScript>();
     private SpawnTiles tileControllerScript = null;
 
+    public GameObject tempMenu = null;
     //private SpriteResourceManager spriteResourceManagerScript = null;
 
     private Dictionary<string, UnitInfo> unitInfoDictionary = new Dictionary<string, UnitInfo>();
@@ -65,6 +68,8 @@ public class GameControllerScript : MonoBehaviour
     /// //////////////////////////////////////////////////////////
     public Text tempUIText;
     public Text tempUIText2;
+
+    private bool menuUp = false;
     
     public void setUIText(string text, Color color)
     {
@@ -95,7 +100,6 @@ public class GameControllerScript : MonoBehaviour
     {
         return currentTeam;
     }
-
 
     //Helper for non-MonoDevelopment scripts print stuff / such as MovementObjects :D
     public void printString(string str)
@@ -187,48 +191,71 @@ public class GameControllerScript : MonoBehaviour
         AbsoluteDirection ab = SpawnTiles.getDirectionToTile(tileControllerScript.getTileFromHexCoord(new Vector2(3,3)),tileControllerScript.getTileFromHexCoord(new Vector2(2,-1)));
         print("TESTING: " + ab);*/
 
-        spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
-        spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
+
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 1, false, AbsoluteDirection.DOWN);
+        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 2)), 0, false, AbsoluteDirection.UP_LEFT);
+        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 1)), 1, false, AbsoluteDirection.DOWN);
+        /*spawnUnit("Lord", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
+        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 1, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 1)), 1, false, AbsoluteDirection.UP);
-
-        enableInteraction();
-
-
+        */
+        //enableInteraction();
+        uiInteractionEnabled = true;
+        gameInteractionEnabled = true;
 
         switchInteractionState(InteractionStates.SelectingLordLocation);
     }
 
-
-
-    public void enableInteraction()
+    public void hitExitButton()
     {
-        interactionEnabled = true;
+        Application.Quit();
     }
-
-
-
-    public void disableInteraction()
-    {
-        interactionEnabled = false;
-    }
-
 
 
     void Update()
     {
-        if (interactionEnabled)
+        if (Input.GetButtonDown("Cancel"))
+        {
+            if (menuUp)
+            {
+                tempMenu.SetActive(false);
+                menuUp = false;
+            }
+            else
+            {
+                tempMenu.SetActive(true);
+                menuUp = true;
+            }
+            /*float diff = Time.time - escapeTimeCache;
+
+            if (diff <= 0.20f)
+            {
+                print("Quiting Application");
+                Application.Quit();
+            }
+
+            escapeTimeCache = Time.time;*/
+        }
+
+
+        if (gameInteractionEnabled)
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                HexTile hexTile = tileControllerScript.getTileAtPixelPos(mpos, true);
-                if (hexTile != null)
+                if ((EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.layer != 5) || EventSystem.current.currentSelectedGameObject == null)
                 {
-                    clickedOnTile(hexTile);
+                    print("TITTY TWISTERS!!!");
+                    Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    HexTile hexTile = tileControllerScript.getTileAtPixelPos(mpos, true);
+                    if (hexTile != null)
+                    {
+                        clickedOnTile(hexTile);
+                    }
                 }
             }
             if (Input.GetButtonDown("Fire2"))
@@ -255,19 +282,6 @@ public class GameControllerScript : MonoBehaviour
 
                 rightClickTimeCache = Time.time;
             }
-            if (Input.GetButtonDown("Cancel"))
-            {
-                float diff = Time.time - escapeTimeCache;
-
-                if (diff <= 0.20f)
-                {
-                    print("Quiting Application");
-                    Application.Quit();
-                }
-
-                escapeTimeCache = Time.time;
-            }
-
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -1057,6 +1071,12 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit Rotation
     void selectingUnitRotation(HexTile clickedTile)
     {
+        if (clickedTile.getCurrentTileState() == TileState.SELECTED)
+        {
+            switchInteractionState(InteractionStates.SelectingUnitToMove);
+            switchToNextTeam();
+        }
+
         if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
         {
             selectedUnit.setRotationDirection(SpawnTiles.relativePosToAbsoluteDirection(clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords()));

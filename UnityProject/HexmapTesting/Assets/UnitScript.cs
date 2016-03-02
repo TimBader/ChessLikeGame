@@ -10,7 +10,7 @@ public enum UnitType
 
 public class UnitScript : MonoBehaviour {
 
-    private Vector2 spriteOffset = new Vector2(0.0f,-0.0f);
+    private Vector2 spriteOffset = new Vector2(0.0f,0.0f);
 
     /// FIND A BETTER WAY
     public static GameControllerScript gameControllerRef = null;

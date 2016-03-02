@@ -102,8 +102,8 @@ public class TempUnitInfos
         ////////////////
         UnitInfo basicUnitInfo = new UnitInfo();
         basicUnitInfo.unitName = "BasicUnit";
-        //basicUnitInfo.baseSpriteName = "BasicUnit_Base";
-        basicUnitInfo.color0SpriteName = "BasicUnit_Base";
+        basicUnitInfo.baseSpriteName = "Cory_Catapult";
+        basicUnitInfo.color0SpriteName = "Cory_Catapult_Colors";
         basicUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new JumpMoveType
@@ -128,8 +128,8 @@ public class TempUnitInfos
         ////////////////
         UnitInfo rangedUnitInfo = new UnitInfo();
         rangedUnitInfo.unitName = "RangedUnit";
-        //rangedUnitInfo.baseSpriteName = "SpecialUnit_Base";
-        rangedUnitInfo.color0SpriteName = "Triangle_Colors";
+        rangedUnitInfo.baseSpriteName = "Axel_Archer_Base";
+        rangedUnitInfo.color0SpriteName = "Axel_Archer_Colors";
         rangedUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new RangedMoveType
@@ -169,8 +169,8 @@ public class TempUnitInfos
         ////////////////
         UnitInfo specialUnitInfo = new UnitInfo();
         specialUnitInfo.unitName = "SpecialUnit";
-        //specialUnitInfo.baseSpriteName = "SpecialUnit_Base";
-        specialUnitInfo.color0SpriteName = "SpecialUnit_Base";
+        specialUnitInfo.baseSpriteName = "Axel_Theif";
+        specialUnitInfo.color0SpriteName = "Axel_Theif_Colors";
         specialUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new SlideMoveType
@@ -201,7 +201,9 @@ public class TempUnitInfos
         ////////////////
         UnitInfo knightUnitInfo = new UnitInfo();
         knightUnitInfo.unitName = "KnightUnit";
-        knightUnitInfo.color0SpriteName = "Star_Colors";
+        knightUnitInfo.baseSpriteName = "knightupdate";
+        //knightUnitInfo.baseSpriteName = "Knight_Base";
+        //knightUnitInfo.color0SpriteName = "Knight_Colors";
         knightUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new ChargeMoveType
@@ -246,7 +248,8 @@ public class TempUnitInfos
         ////////////////
         UnitInfo normalUnitInfo = new UnitInfo();
         normalUnitInfo.unitName = "NormalUnit";
-        normalUnitInfo.color0SpriteName = "Pentagon_Colors";//Pentagon_Colors
+        normalUnitInfo.baseSpriteName = "Axel_Swordsman";//Pentagon_Colors
+        normalUnitInfo.color0SpriteName = "Axel_Swordsman_Colors";//Pentagon_Colors
         normalUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new PathMoveType

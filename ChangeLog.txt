@@ -1,6 +1,14 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.9 ]
+Author: Tim Bader
+- Added new character images to assets and provided a non-sensical implementation
+
+*Extra
+- Clicking on the selected unit in RotatedSelectedUnitMode will skip
+
+
 [ v0.0.8 ]
 Author: Tim Bader
 - Allowed the RepositionUnit to spawn

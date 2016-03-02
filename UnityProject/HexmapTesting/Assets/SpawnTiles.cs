@@ -68,7 +68,7 @@ public class SpawnTiles : MonoBehaviour {
     //Remember units are in unity units. 100px = 1 unity unit
     public const float TILE_INNER_WIDTH = 0.79f;
     public const float TILE_OUTER_WIDTH = 0.35f;
-    public const float TILE_HEIGHT = 0.69f;
+    public const float TILE_HEIGHT = 0.74f;
     public const float TILE_WIDTH = TILE_INNER_WIDTH + 2*TILE_OUTER_WIDTH;
     public const float TILE_WIDTH_PART = TILE_INNER_WIDTH + TILE_OUTER_WIDTH;
 
@@ -239,8 +239,7 @@ public class SpawnTiles : MonoBehaviour {
         AbsoluteDirection.UP,
         AbsoluteDirection.DOWN
     };
-    //private AbsoluteDirection tempTeam0Direction = AbsoluteDirection.UP;
-    //private AbsoluteDirection tempTeam1Direction = AbsoluteDirection.DOWN;
+
 
     public void initialize()
     {
