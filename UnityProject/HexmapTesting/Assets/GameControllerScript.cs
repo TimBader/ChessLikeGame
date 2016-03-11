@@ -40,6 +40,10 @@ public class GameControllerScript : MonoBehaviour
     private List<TeamControllerScript> teamControllers = new List<TeamControllerScript>();
     private SpawnTiles tileControllerScript = null;
 
+    private List<MovementIcon> currentModesMovementIcons = new List<MovementIcon>();
+
+    public GameObject movementIconPrefab = null;
+
     public GameObject tempMenu = null;
     //private SpriteResourceManager spriteResourceManagerScript = null;
 
@@ -125,7 +129,26 @@ public class GameControllerScript : MonoBehaviour
         unitInfoDictionary.Add(info.unitName, info);
     }
 
+    // Copied from MovementObjects xP
+    public MovementIcon createMovementIcon(string spriteName, Vector2 coords, Color blendColor, int depth = 0, bool pixelCoords = false)
+    {
+        GameObject unitGameObject = (GameObject)Instantiate(movementIconPrefab);
+        MovementIcon m = (MovementIcon)unitGameObject.GetComponent(typeof(MovementIcon));
+        m.initialize(spriteName, coords, blendColor, depth, pixelCoords);
+        currentModesMovementIcons.Add(m);
+        return m;
+    }
 
+    public void clearAllMovementIcons()
+    {
+        while (currentModesMovementIcons.Count != 0)
+        {
+            //Delete MovementIcons
+            DestroyObject(currentModesMovementIcons[0].gameObject);
+            currentModesMovementIcons.RemoveAt(0);
+        }
+    }
+    //
 
     public UnitInfo getUnitInfo(string unitName)
     {
@@ -181,30 +204,28 @@ public class GameControllerScript : MonoBehaviour
         setUIText("Temp", Color.black);
 
         //Testing
-        /*spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 6)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 7)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 8)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 9)), 1, false, AbsoluteDirection.UP);
-        
-        //Testing
-        AbsoluteDirection ab = SpawnTiles.getDirectionToTile(tileControllerScript.getTileFromHexCoord(new Vector2(3,3)),tileControllerScript.getTileFromHexCoord(new Vector2(2,-1)));
-        print("TESTING: " + ab);*/
+        /*spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(0, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(0, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("Lord", tileControllerScript.getTileFromHexCoord(new Vector2(2, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("Lord", tileControllerScript.getTileFromHexCoord(new Vector2(2, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 5)), 1, false, AbsoluteDirection.UP);
+        */       
+
+        //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 3)), 0, false, AbsoluteDirection.UP_RIGHT);
+        //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 0, false, AbsoluteDirection.UP);
+        //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
 
 
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 1, false, AbsoluteDirection.DOWN);
-        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 2)), 0, false, AbsoluteDirection.UP_LEFT);
-        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 1)), 1, false, AbsoluteDirection.DOWN);
-        /*spawnUnit("Lord", tileControllerScript.getTileFromHexCoord(new Vector2(4, 2)), 0, false, AbsoluteDirection.UP_LEFT);
-        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 1)), 0, false, AbsoluteDirection.UP);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 1)), 1, false, AbsoluteDirection.UP);
-        */
-        //enableInteraction();
+
         uiInteractionEnabled = true;
         gameInteractionEnabled = true;
 
@@ -249,7 +270,7 @@ public class GameControllerScript : MonoBehaviour
             {
                 if ((EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.layer != 5) || EventSystem.current.currentSelectedGameObject == null)
                 {
-                    print("TITTY TWISTERS!!!");
+                    //print("TITTY TWISTERS!!!");
                     Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                     HexTile hexTile = tileControllerScript.getTileAtPixelPos(mpos, true);
                     if (hexTile != null)
@@ -322,7 +343,7 @@ public class GameControllerScript : MonoBehaviour
             if (Input.GetButtonDown("q"))
             {
                 Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                print("HexCoord at Mouse Position: " + tileControllerScript.pixelCoordToHex(new Vector2(mpos.x, mpos.y)));
+                print("HexCoord at Mouse Position: " + SpawnTiles.pixelCoordToHex(new Vector2(mpos.x, mpos.y)));
                 
             }
 
@@ -454,6 +475,26 @@ public class GameControllerScript : MonoBehaviour
                 endSelectingUnitMovement(state);
                 break;
 
+            case InteractionStates.SelectingLordLocation:
+                endSelectingLordLocation();
+                break;
+
+            case InteractionStates.SelectingGuardSpawnPoint:
+                endSelectingGuardSpawnPoint();
+                break;
+
+            case InteractionStates.SelectingUnitSpawnPoint:
+                endSelectingUnitSpawnPoint();
+                break;
+
+            case InteractionStates.SelectingUnitToMove:
+                endSelectingUnitToMove();
+                break;
+
+            case InteractionStates.SelectingUnitToRotate:
+                endSelectingUnitToRotate();
+                break;
+
         }
 
         //Starting Next State
@@ -516,7 +557,8 @@ public class GameControllerScript : MonoBehaviour
             {
                 if (tiles[i].teamSpawnLoc == currentTeam)
                 {
-                    tiles[i].switchState(TileState.SPAWNABLE);
+                    tiles[i].switchState(TileState.SELECTABLE);
+                    createMovementIcon("PlaceIcon", tiles[i].getCoords(), Color.yellow);
                 }
                 else
                 {
@@ -550,7 +592,7 @@ public class GameControllerScript : MonoBehaviour
 
         tileControllerScript.switchAllTileStates();
 
-        setUIText("Team: " + currentTeam + ", Select Guard Spawn Point", new Color(1.0f, 1.0f, 0.0f));
+        setUIText("Team: " + currentTeam + ", Select Guard Spawn Point", Color.yellow);
         setUIText2("", Color.yellow);
 
         List<HexTile> adjacent = tileControllerScript.getAdjacentTiles(getTeamController(currentTeam).getLord().getOccupyingHex());
@@ -560,11 +602,17 @@ public class GameControllerScript : MonoBehaviour
         {
             if (adjacent[i] != null)
             {
+                createMovementIcon("PlaceIcon", adjacent[i].getCoords(), Color.yellow);
                 if (adjacent[i].getOccupyingUnit() == null)
                 {
-                    adjacent[i].switchState(TileState.SPAWNABLE);
+                    adjacent[i].switchState(TileState.SELECTABLE);
                     freeSpace = true;
                 }
+                else
+                {
+                    createMovementIcon("CrossIcon", adjacent[i].getCoords(), Color.red, 1);
+                }
+
             }
         }
         if (!freeSpace)
@@ -600,6 +648,8 @@ public class GameControllerScript : MonoBehaviour
 
         List<HexTile> adjacentTiles = tileControllerScript.getAdjacentTiles(selectedUnit.getOccupyingHex(), true);
 
+        Vector2 unitCoords = SpawnTiles.hexCoordToPixelCoord(selectedUnit.getCoords());
+
         if (selectedUnit.getUnitInfo().rotationEnabled)
         {
             print("TEAM: " + currentTeam + " --> Select Guard Unit's Rotation.  Press [SpaceBar] to skip");
@@ -607,7 +657,22 @@ public class GameControllerScript : MonoBehaviour
             {
                 if (adjacentTiles[i] != null)
                 {
-                    adjacentTiles[i].switchState(TileState.MOVEABLE);
+                    adjacentTiles[i].switchState(TileState.SELECTABLE);
+
+                    //Creating Temp Tiles if any just incase
+                    Vector2 pixCoords = SpawnTiles.hexCoordToPixelCoord(adjacentTiles[i].getCoords());
+
+                    MovementIcon pathStartIcon = createMovementIcon("PathStartIcon", pixCoords, Color.green, 0, true);
+                    MovementIcon arrowHead = createMovementIcon("ArrowHeadIcon", pixCoords, Color.green, 1, true);
+
+                    Vector2 Q = pixCoords - unitCoords;
+                    float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+                    pathStartIcon.transform.Rotate(Vector3.forward, angle);
+                    Vector2 newRelPosition = Q.normalized * 46 / 100;
+
+                    pathStartIcon.transform.position = pathStartIcon.transform.position - new Vector3(newRelPosition.x, newRelPosition.y, 1.0f);
+                    arrowHead.transform.Rotate(Vector3.forward, angle);
+                    //.transform.localScale = new Vector2(dist / 24, 1.0f);
                 }
                 else
                 {
@@ -641,10 +706,15 @@ public class GameControllerScript : MonoBehaviour
         {
             if (adjacent[i] != null)
             {
+                createMovementIcon("PlaceIcon", adjacent[i].getCoords(), Color.yellow, 0);
                 if (adjacent[i].getOccupyingUnit() == null)
                 {
-                    adjacent[i].switchState(TileState.SPAWNABLE);
+                    adjacent[i].switchState(TileState.SELECTABLE);
                     freeSpace = true;
+                }
+                else
+                {
+                    createMovementIcon("CrossIcon", adjacent[i].getCoords(), Color.red, 1);
                 }
             }
         }
@@ -681,6 +751,8 @@ public class GameControllerScript : MonoBehaviour
 
         List<HexTile> adjacentTiles = tileControllerScript.getAdjacentTiles(selectedUnit.getOccupyingHex(), true);
 
+        Vector2 unitCoords = SpawnTiles.hexCoordToPixelCoord(selectedUnit.getCoords());
+
         if (selectedUnit.getUnitInfo().rotationEnabled)
         {
             print("TEAM: " + currentTeam + " --> Select Spawned Unit's Rotation.  Press [SpaceBar] to skip");
@@ -688,7 +760,22 @@ public class GameControllerScript : MonoBehaviour
             {
                 if (adjacentTiles[i] != null)
                 {
-                    adjacentTiles[i].switchState(TileState.MOVEABLE);
+                    adjacentTiles[i].switchState(TileState.SELECTABLE);
+
+                    //Creating Temp Tiles if any just incase
+                    Vector2 pixCoords = SpawnTiles.hexCoordToPixelCoord(adjacentTiles[i].getCoords());
+
+                    MovementIcon pathStartIcon = createMovementIcon("PathStartIcon", pixCoords, Color.green, 0, true);
+                    MovementIcon arrowHead = createMovementIcon("ArrowHeadIcon", pixCoords, Color.green, 1, true);
+
+                    Vector2 Q = pixCoords - unitCoords;
+                    float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+                    pathStartIcon.transform.Rotate(Vector3.forward, angle);
+                    Vector2 newRelPosition = Q.normalized * 46 / 100;
+
+                    pathStartIcon.transform.position = pathStartIcon.transform.position - new Vector3(newRelPosition.x, newRelPosition.y, 1.0f);
+                    arrowHead.transform.Rotate(Vector3.forward, angle);
+                    //.transform.localScale = new Vector2(dist / 24, 1.0f);
                 }
                 else
                 {
@@ -734,6 +821,7 @@ public class GameControllerScript : MonoBehaviour
                 if (canMove)
                 {
                     atLeastOneCanMove = true;
+                    createMovementIcon("SelectableIcon", allUnits[i].getCoords(), Color.cyan);
                     allUnits[i].getOccupyingHex().switchState(TileState.SELECTABLE);
                 }
             }
@@ -781,11 +869,11 @@ public class GameControllerScript : MonoBehaviour
             {
                 iAlt -= selectedUnit.getUnitInfo().movementObjects.Count;
             }
-            if (selectedUnit.getUnitInfo().movementObjects[i].canMove(selectedUnit, currentTeam))
-            {
+            //if (selectedUnit.getUnitInfo().movementObjects[i].canMove(selectedUnit, currentTeam))
+            //{
                 altCounter = iAlt;
                 break;
-            }
+            //}
         }
         selectedUnit.getUnitInfo().movementObjects[altCounter].startSelectingInMode(selectedUnit, currentTeam);
     }
@@ -805,13 +893,14 @@ public class GameControllerScript : MonoBehaviour
         bool foundOne = false;
         for (int i = 0; i < units.Length; i++)
         {
-            if (units[i].getTeam() == currentTeam)
+            if (units[i].getTeam() == currentTeam && !units[i].garbage)
             {
                 //print("Kitty cat was found!!!");
                 if (units[i].getUnitInfo().rotationEnabled || units[i].getUnitInfo().relativeRotationDirections.Count != 0)
                 {
                     foundOne = true;
-                    units[i].getOccupyingHex().switchState(TileState.MOVEABLE);
+                    units[i].getOccupyingHex().switchState(TileState.SELECTABLE);
+                    createMovementIcon("SelectableIcon", units[i].getCoords(), Color.green);
                 }
             }
         }
@@ -840,34 +929,72 @@ public class GameControllerScript : MonoBehaviour
 
         selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
 
-        List<RelativeDirection> relativeDirections = selectedUnit.getUnitInfo().relativeRotationDirections;
+        List<RelativeDirection> tempRelDirList = selectedUnit.getUnitInfo().relativeRotationDirections;
+        List<RelativeDirection> relativeDirections = new List<RelativeDirection>();
+        for (int i = 0; i < tempRelDirList.Count; i++)
+        {
+            relativeDirections.Add(tempRelDirList[i]);
+        }
 
-        Vector2 originalHexCoordPos = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(selectedUnit.getRotation());
-        tileControllerScript.addNewTempTile(originalHexCoordPos);
 
-        tileControllerScript.getTileFromHexCoord(originalHexCoordPos, true).switchState(TileState.NONSELECTABLE);
+        print("Count Mate: " + relativeDirections.Count); //Saftychecking
+        relativeDirections.Add(RelativeDirection.FORWARD);
+        //The original direction draw it
+        //Vector2 originalHexCoordPos = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(selectedUnit.getRotation());
+
+        //tileControllerScript.addNewTempTile(originalHexCoordPos);
+
+        //tileControllerScript.getTileFromHexCoord(originalHexCoordPos, true).switchState(TileState.NONSELECTABLE);
+
+        Vector2 unitCoords = SpawnTiles.hexCoordToPixelCoord(selectedUnit.getCoords());
 
         for (int i = 0; i < relativeDirections.Count; i++)
         {
+            Color drawColor = Color.green;
+            //Since you cant rotate forward, draw it black to show original direction
+            if (relativeDirections[i] == RelativeDirection.FORWARD)
+            {
+                drawColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+            }
+
             AbsoluteDirection rotationDirection = SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), relativeDirections[i]);
             
             //Creating Temp Tiles if any just incase
             Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(rotationDirection);
+
+            Vector2 pixCoords = SpawnTiles.hexCoordToPixelCoord(hexCoord);
+
+            MovementIcon pathStartIcon = createMovementIcon("PathStartIcon", pixCoords, drawColor, 0, true);
+            MovementIcon arrowHead = createMovementIcon("ArrowHeadIcon", pixCoords, drawColor, 1, true);
+
+            Vector2 Q = pixCoords - unitCoords;
+            float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+            pathStartIcon.transform.Rotate(Vector3.forward, angle);
+            Vector2 newRelPosition = Q.normalized * 46/100;
+
+            pathStartIcon.transform.position = pathStartIcon.transform.position - new Vector3(newRelPosition.x, newRelPosition.y, 1.0f);
+            arrowHead.transform.Rotate(Vector3.forward, angle);
+            //.transform.localScale = new Vector2(dist / 24, 1.0f);
+
+
             tileControllerScript.addNewTempTile(hexCoord);
 
             HexTile tile = tileControllerScript.getTileFromHexCoord(hexCoord, true);
-            /*if (tile != null)
-            {*/
-                tile.switchState(TileState.MOVEABLE);
-            /*}*/
+            if (relativeDirections[i] != RelativeDirection.FORWARD)
+            {
+                tile.switchState(TileState.SELECTABLE);
+            }
         }
+
+        //tileControllerScript.getTileFromHexCoord(originalHexCoordPos, true).switchState(TileState.NONSELECTABLE);/
+
     }
 
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     // ****** Clicked In Interaction States ****** //
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     void clickedOnTile(HexTile clickedTile)
     {
@@ -957,7 +1084,7 @@ public class GameControllerScript : MonoBehaviour
     {
         // Very close to Selecting Unit Spawn Point but not
 
-        if (clickedTile.getCurrentTileState() == TileState.SPAWNABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             selectedUnit = spawnUnit("BasicUnit", clickedTile, currentTeam, false, getTeamController(currentTeam).defaultDirection);
             switchInteractionState(InteractionStates.SelectingGuardDirection);
@@ -973,7 +1100,7 @@ public class GameControllerScript : MonoBehaviour
         {
             switchInteractionState(InteractionStates.SelectingGuardSpawnPoint);
         }
-        else if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        else if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             Vector2 relPosOfClicked = clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords();
 
@@ -988,7 +1115,7 @@ public class GameControllerScript : MonoBehaviour
     void selectingUnitSpawnPoint(HexTile clickedTile)
     {
 
-        if (clickedTile.getCurrentTileState() == TileState.SPAWNABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             string[] tempSpawnList = 
             {
@@ -1016,7 +1143,7 @@ public class GameControllerScript : MonoBehaviour
             switchInteractionState(InteractionStates.SelectingUnitToMove);
         }
 
-        else if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        else if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             Vector2 relPosOfClicked = clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords();
 
@@ -1059,7 +1186,7 @@ public class GameControllerScript : MonoBehaviour
 // -- Selecting Unit To Rotate
     void selectingUnitToRotate(HexTile clickedTile)
     {
-        if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             selectedUnit = clickedTile.getOccupyingUnit();
 
@@ -1073,11 +1200,9 @@ public class GameControllerScript : MonoBehaviour
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTED)
         {
-            switchInteractionState(InteractionStates.SelectingUnitToMove);
-            switchToNextTeam();
+            switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
-
-        if (clickedTile.getCurrentTileState() == TileState.MOVEABLE)
+        else if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             selectedUnit.setRotationDirection(SpawnTiles.relativePosToAbsoluteDirection(clickedTile.getCoords() - selectedUnit.getOccupyingHex().getCoords()));
 
@@ -1094,6 +1219,7 @@ public class GameControllerScript : MonoBehaviour
     void endSelectingGuardDirection()
     {
         tileControllerScript.clearAllTempTiles();
+        clearAllMovementIcons();
     }
 
 
@@ -1101,6 +1227,7 @@ public class GameControllerScript : MonoBehaviour
     void endSelectingSpawnedUnitDirection()
     {
         tileControllerScript.clearAllTempTiles();
+        clearAllMovementIcons();
     }
 
 
@@ -1108,6 +1235,7 @@ public class GameControllerScript : MonoBehaviour
     void endSelectingUnitRotation()
     {
         tileControllerScript.clearAllTempTiles();
+        clearAllMovementIcons();
     }
 
 
@@ -1118,6 +1246,40 @@ public class GameControllerScript : MonoBehaviour
         {
             altCounter = 0;
         }
+
+        selectedUnit.clearAllMovementIcons();
+        clearAllMovementIcons();
+    }
+
+// -- End Selecting Lord Location
+    void endSelectingLordLocation()
+    {
+        print("Meowzeres");
+        clearAllMovementIcons();
+    }
+
+// -- End Selecting Guard Spawn Point
+    void endSelectingGuardSpawnPoint()
+    {
+        clearAllMovementIcons();
+    }
+
+// -- End Selecting Unit Spawn Point
+    void endSelectingUnitSpawnPoint()
+    {
+        clearAllMovementIcons();
+    }
+
+// -- End Selecting Unit To Move
+    void endSelectingUnitToMove()
+    {
+        clearAllMovementIcons();
+    }
+
+// -- End Selecting Unit To Rotate
+    void endSelectingUnitToRotate()
+    {
+        clearAllMovementIcons();
     }
 
 // ----------------------------------------------------------------------------------------------------------------------------------------------------------------

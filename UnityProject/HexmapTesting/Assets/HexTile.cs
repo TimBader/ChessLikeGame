@@ -5,11 +5,12 @@ public enum TileState
 {
     NONE,
     SELECTED,
-    MOVEABLE,
+    //MOVEABLE,
     SELECTABLE,
-    ATTACKABLE,
-    SPAWNABLE,
-    NONSELECTABLE
+    TEMPTILE
+    //ATTACKABLE,
+    //SPAWNABLE,
+    //NONSELECTABLE
 };
 
 public class HexTile : MonoBehaviour {
@@ -34,6 +35,7 @@ public class HexTile : MonoBehaviour {
     public void initialize()
     {
         spriteRendererRef = GetComponent<SpriteRenderer>();
+        spriteRendererRef.sprite = baseSprite;
     }
 
 
@@ -42,7 +44,12 @@ public class HexTile : MonoBehaviour {
     public void switchState(TileState state = TileState.NONE)
     {
         currentState = state;
-        switch (state)
+
+        /*if (state == TileState.TEMPTILE)
+        {
+            spriteRendererRef.sprite = nonSelectableSprite;
+        }*/
+        /*switch (state)
         {
             case TileState.NONE:
                 spriteRendererRef.sprite = baseSprite;
@@ -52,28 +59,33 @@ public class HexTile : MonoBehaviour {
                 spriteRendererRef.sprite = selectedSprite;
                 break;
 
-            case TileState.MOVEABLE:
-                spriteRendererRef.sprite = moveableSprite;
-                break;
+            //case TileState.MOVEABLE:
+                //spriteRendererRef.sprite = moveableSprite;
+                //break;
 
             case TileState.SELECTABLE:
                 spriteRendererRef.sprite = selectableSprite;
                 break;
 
-            case TileState.ATTACKABLE:
-                spriteRendererRef.sprite = attackableSprite;
-                break;
+            //case TileState.ATTACKABLE:
+                //spriteRendererRef.sprite = attackableSprite;
+                //break;
 
-            case TileState.SPAWNABLE:
-                spriteRendererRef.sprite = spawnableSprite;
-                break;
+            //case TileState.SPAWNABLE:
+                //spriteRendererRef.sprite = spawnableSprite;
+                //break;
 
-            case TileState.NONSELECTABLE:
-                spriteRendererRef.sprite = nonSelectableSprite;
-                break;
-        }
+            //case TileState.NONSELECTABLE:
+                //spriteRendererRef.sprite = nonSelectableSprite;
+                //break;
+        }*/
     }
 
+
+    public SpriteRenderer getSpriteRenderer()
+    {
+        return spriteRendererRef;
+    }
 
 
     public TileState getCurrentTileState()
@@ -107,6 +119,10 @@ public class HexTile : MonoBehaviour {
 
     public UnitScript getOccupyingUnit()
     {
+        if (occupyingUnit && occupyingUnit.garbage)
+        {
+            return null;//Double checking
+        }
         return occupyingUnit;
     }
 

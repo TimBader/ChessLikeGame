@@ -60,7 +60,7 @@ public class SpawnTiles : MonoBehaviour {
 
 
 	// Use this for initialization
-    public GameObject hexTile;
+    public GameObject hexTileType;
     public GameObject spawnUnitType;
     public Sprite tempSprite;
     public Sprite tempUntochedSprite;
@@ -77,7 +77,7 @@ public class SpawnTiles : MonoBehaviour {
     private Vector2 minCoords = new Vector2(0x7fff, 0x7fff);
     private Vector2 maxCoords = new Vector2(-0x7fff, -0x7fff);
     private List<HexTile> hexTileList;
-    private Vector2 OriginTileWorldOffset = new Vector2(-1.0f,-1.0f);
+    private static Vector2 OriginTileWorldOffset = new Vector2(-1.0f,-1.0f);
 
     private List<HexTile> tempTiles = new List<HexTile>();
 
@@ -252,9 +252,10 @@ public class SpawnTiles : MonoBehaviour {
     {
         if (getTileFromHexCoord(newTempTilePosition) == null)
         {
-            GameObject go = (GameObject)Instantiate(hexTile, hexCoordToPixelCoord(newTempTilePosition), Quaternion.identity);
+            GameObject go = (GameObject)Instantiate(hexTileType, hexCoordToPixelCoord(newTempTilePosition), Quaternion.identity);
             HexTile hexTileScript = (HexTile)go.GetComponent(typeof(HexTile));
             hexTileScript.initialize();
+            hexTileScript.getSpriteRenderer().sprite = hexTileScript.nonSelectableSprite;
             hexTileScript.setCoords(newTempTilePosition);
             tempTiles.Add(hexTileScript);
         }
@@ -315,7 +316,7 @@ public class SpawnTiles : MonoBehaviour {
             int col = Mathf.FloorToInt(Mathf.Abs(hexCoordMap[i].x - minCoords.x));
             int row = Mathf.FloorToInt(Mathf.Abs(hexCoordMap[i].y - minCoords.y)) * tileMapWidth;
 
-            GameObject go = (GameObject)Instantiate(hexTile, hexCoordToPixelCoord(hexLoc), Quaternion.identity);
+            GameObject go = (GameObject)Instantiate(hexTileType, hexCoordToPixelCoord(hexLoc), Quaternion.identity);
             HexTile hexTileScript = (HexTile)go.GetComponent(typeof(HexTile));
             hexTileScript.initialize();
             hexTileScript.setCoords(hexCoordMap[i]);
@@ -421,7 +422,7 @@ public class SpawnTiles : MonoBehaviour {
 
 
 
-    public Vector2 hexCoordToPixelCoord(Vector2 hexCoord, bool ignoreOffsets = false)
+    public static Vector2 hexCoordToPixelCoord(Vector2 hexCoord, bool ignoreOffsets = false)
     {
         if (ignoreOffsets)
             return new Vector2(
@@ -436,14 +437,14 @@ public class SpawnTiles : MonoBehaviour {
 
 
 
-    public Vector2 getOriginTileOffset()
+    public static Vector2 getOriginTileOffset()
     {
         return OriginTileWorldOffset;
     }
 
 
 
-    public Vector2 pixelCoordToHex(Vector2 pixelCoord)
+    public static Vector2 pixelCoordToHex(Vector2 pixelCoord)
     {
         float xHexFloaty = (pixelCoord.x) / TILE_WIDTH_PART;
         float yHexFloaty = -(pixelCoord.x) / (2 * TILE_WIDTH_PART) + (pixelCoord.y) / TILE_HEIGHT;

@@ -1,6 +1,12 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.10 ]
+Author: Tim Bader
+- Added multiple icons and systems for said systems for movement, rotations and many more
+- Fixed a ton of bugs with reposition, charge, slide, and path movetypes
+- Commented out the tile coloring stuff as we now has somewhat a proper UI
+
 [ v0.0.9 ]
 Author: Tim Bader
 - Added new character images to assets and provided a non-sensical implementation

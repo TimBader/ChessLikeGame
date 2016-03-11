@@ -13,7 +13,7 @@ public enum MovementTypes
 }
 
 //!!!!! Always make sure each does not have a relative position/direction of (0,0)
-public abstract class MovementTypeParent
+public abstract class MovementTypeParent : Object
 {
     //This is just to serve as a parent so we can stored all childern of this parent in one place... so far I cant think of anything MovementTypeParent should have
     protected static GameControllerScript gameControllerRef = null;
@@ -21,6 +21,8 @@ public abstract class MovementTypeParent
     protected MovementTypes movementType = MovementTypes.Path;
 
     public MovementTypeParent() { }
+
+    public List<MovementIcon> movementIcons = new List<MovementIcon>();
 
     public static void setGameControllerRef(GameControllerScript gameControllerScriptRef)
     {
@@ -67,6 +69,27 @@ public abstract class MovementTypeParent
     public MovementTypes getMovementType()
     {
         return movementType;
+    }
+
+    public abstract void drawMovementIcons(UnitScript selectedUnit);
+
+    public void clearMovementIcons()
+    {
+        while (movementIcons.Count != 0)
+        {
+            //Delete MovementIcons
+            DestroyObject(movementIcons[0].gameObject);
+            movementIcons.RemoveAt(0);
+        }
+    }
+
+    public MovementIcon createMovementIcon(string spriteName, Vector2 coords, Color blendColor, int depth = 0, bool pixelCoords = false)
+    {
+        GameObject unitGameObject = (GameObject)Instantiate(gameControllerRef.movementIconPrefab);
+        MovementIcon m = (MovementIcon)unitGameObject.GetComponent(typeof(MovementIcon));
+        m.initialize(spriteName, coords, blendColor, depth, pixelCoords);
+        movementIcons.Add(m);
+        return m;
     }
 };
 
@@ -137,13 +160,6 @@ public class PathMoveType : MovementTypeParent
                 if (blocked)
                 {
                     HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedPathList[i][j].pos);
-                    if (tile)
-                    {
-                        if (tile.getCurrentTileState() != TileState.SELECTABLE)
-                        {
-                            tile.switchState(TileState.NONSELECTABLE);
-                        }
-                    }
                     continue;
                 }
                 else
@@ -158,7 +174,7 @@ public class PathMoveType : MovementTypeParent
                             {
                                 if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
                                 {
-                                    tile.switchState(TileState.ATTACKABLE);
+                                    tile.switchState(TileState.SELECTABLE);
                                     continue;
                                 }
                             }
@@ -171,10 +187,6 @@ public class PathMoveType : MovementTypeParent
                                 continue;
                             }
                         }
-                        if (tile.getCurrentTileState() != TileState.SELECTABLE)
-                        {
-                            tile.switchState(TileState.NONSELECTABLE);
-                        }
                     }
                     else
                     {
@@ -183,14 +195,14 @@ public class PathMoveType : MovementTypeParent
                 }
             }
         }
-
+        drawMovementIcons(selectedUnit);
     }
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            if (clickedTile.getOccupyingUnit())
             {
                 gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
             }
@@ -282,6 +294,77 @@ public class PathMoveType : MovementTypeParent
     {
         return new PathMoveType(pathList);
     }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        for (int i = 0; i < adjustedPathList.Count; i++)
+        {
+            bool blocked = false;
+            HexTile lastTile = selectedUnit.getOccupyingHex();
+            createMovementIcon("PathIcon", selectedUnit.getCoords(), Color.blue, 2);
+            for (int j = 0; j < adjustedPathList[i].Count; j++)
+            {
+                Vector2 tileCoords = selectedUnit.getOccupyingHex().getCoords() + adjustedPathList[i][j].pos;
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(tileCoords);
+                if (tile)
+                {
+                    Color color = new Color(0.0f, 0.0f, 1.0f, 1.0f);
+                    int depth = 2;//to allow blocked symbols to appear under non-blocked ones
+                    if (blocked)
+                    {
+                        color = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+                        depth = 1;
+                    }
+                    if (tile.getOccupyingUnit())
+                    {
+                        if (!blocked)
+                        {
+                            blocked = true;
+                            if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam() || !adjustedPathList[i][j].moveable)
+                            {
+                                createMovementIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 1.0f), 3);
+                            }
+                            else
+                            {
+                                createMovementIcon("AttackIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 1.0f), 3);
+                            }
+                        }
+                    }
+
+                    Vector2 lastCoords = SpawnTiles.hexCoordToPixelCoord(lastTile.getCoords());
+                    Vector2 currentCoords = SpawnTiles.hexCoordToPixelCoord(tileCoords);
+                    MovementIcon m = createMovementIcon("PathConnectionIcon", lastCoords, color, 0, true);
+
+                    Vector2 Q = currentCoords - lastCoords;
+                    float dist = Q.magnitude * 100;
+
+                    if (adjustedPathList[i][j].moveable)
+                    {
+                        createMovementIcon("PathSelectableIcon", tileCoords, color, depth);
+                        dist -= 15;
+                        if (dist < 0)
+                            dist = 0;
+                    }
+                    else
+                    {
+                        createMovementIcon("PathIcon", tileCoords, color, depth);
+                    }
+
+                    float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+                    gameControllerRef.printString(dist.ToString());
+                    m.transform.Rotate(Vector3.forward, angle);
+                    m.transform.localScale = new Vector2(dist / 24, 1.0f);
+
+                    lastTile = tile;
+                }
+                else
+                {
+                    createMovementIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 1.0f), 3);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 
@@ -334,11 +417,7 @@ public class JumpMoveType : MovementTypeParent
                 {
                     if (tile.getOccupyingUnit().getTeam() != currentTeam)
                     {
-                        tile.switchState(TileState.ATTACKABLE);
-                    }
-                    else
-                    {
-                        tile.switchState(TileState.NONSELECTABLE);
+                        tile.switchState(TileState.SELECTABLE);
                     }
                 }
                 else
@@ -347,14 +426,16 @@ public class JumpMoveType : MovementTypeParent
                 }
             }
         }
+
+        drawMovementIcons(selectedUnit);
     }
 
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            if (clickedTile.getOccupyingUnit())
             {
                 gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
             }
@@ -410,6 +491,31 @@ public class JumpMoveType : MovementTypeParent
     public override MovementTypeParent clone()
     {
         return new JumpMoveType(jumpPositions);
+    }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        for (int i = 0; i < jumpPositions.Count; i++)
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedJumpPositions[i]);
+            if (tile)
+            {
+                createMovementIcon("JumpIcon", tile.getCoords(), new Color(1.0f,0.0f,1.0f,1.0f), 0);
+                if (tile.getOccupyingUnit())
+                {
+                    if (tile.getOccupyingUnit().getTeam() != selectedUnit.getTeam())
+                    {
+                        createMovementIcon("AttackIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                    else
+                    {
+                        createMovementIcon("CrossIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                }
+            }
+        }
+        //MovementIcon m = new MovementIcon();
+        //m.initialize("PlaceIcon", );
     }
 };
 
@@ -475,17 +581,17 @@ public class SlideMoveType : MovementTypeParent
 
                         if (prevTile)
                         {
-                            prevTile.switchState(TileState.MOVEABLE);
+                            prevTile.switchState(TileState.NONE);
                         }
                     }
                     else
                     {
                         if (currentTile.getOccupyingUnit().getTeam() != currentTeam)
                         {
-                            currentTile.switchState(TileState.ATTACKABLE);
+                            currentTile.switchState(TileState.SELECTABLE);
                             if (prevTile)
                             {
-                                prevTile.switchState(TileState.MOVEABLE);
+                                prevTile.switchState(TileState.NONE);
                             }
                         }
                         break;
@@ -500,13 +606,15 @@ public class SlideMoveType : MovementTypeParent
                 j++;
             }
         }
+
+        drawMovementIcons(selectedUnit);
     }
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE || clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
-            if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+            if (clickedTile.getOccupyingUnit())
             {
                 gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
             }
@@ -578,6 +686,72 @@ public class SlideMoveType : MovementTypeParent
     {
         return new SlideMoveType(directions, ranges);
     }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        for (int i = 0; i < adjustedDirections.Count; i++)
+        {
+            int j = 0;
+            Vector2 currentTileLoc = selectedUnit.getOccupyingHex().getCoords();
+            HexTile lastTile = null;
+            createMovementIcon("PathIcon", selectedUnit.getCoords(), Color.cyan, 3);
+            while (j < ranges[i] || ranges[i] == -1)
+            {
+                currentTileLoc += adjustedDirections[i];
+
+                HexTile currentTile = gameControllerRef.getTileController().getTileFromHexCoord(currentTileLoc);
+
+                //prevTile = currentTile;
+                if (currentTile)
+                {
+                    if (currentTile.getOccupyingUnit())
+                    {
+                        if (currentTile.getOccupyingUnit().getTeam() != selectedUnit.getTeam())
+                        {
+                            lastTile = currentTile;
+                            createMovementIcon("AttackIcon", currentTile.getCoords(), Color.red, 4);
+                        }
+                        else
+                        {
+                            createMovementIcon("CrossIcon", currentTile.getCoords(), Color.red, 4);
+                        }
+                        break;
+                    }
+                    lastTile = currentTile;
+
+                }
+                else
+                {
+                    createMovementIcon("CrossIcon", currentTileLoc, Color.red, 4);
+                    break;
+                }
+                j++;
+            }
+
+            if (lastTile)
+            {
+                MovementIcon m = createMovementIcon("PathConnectionIcon", selectedUnit.getCoords(), Color.cyan, 1);
+                Vector2 lastTileCoords = SpawnTiles.hexCoordToPixelCoord(lastTile.getCoords());
+                Vector2 startTileCoords = SpawnTiles.hexCoordToPixelCoord(selectedUnit.getCoords());
+
+                Vector2 Q = lastTileCoords - startTileCoords;
+                float dist = Q.magnitude*100 - 15;
+                if (dist < 0)
+                {
+                    dist = 0;
+                }
+                float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+                //gameControllerRef.printString(dist.ToString());
+                m.transform.Rotate(Vector3.forward, angle);
+                m.transform.localScale = new Vector2(dist/24, 1.0f);
+
+                MovementIcon mHead = createMovementIcon("ArrowHeadIcon", lastTileCoords, Color.cyan, 2, true);
+                mHead.transform.Rotate(Vector3.forward, angle);
+
+                createMovementIcon("PathIcon", lastTileCoords, Color.cyan, 1, true);
+            }
+        }
+    }
 }
 
 
@@ -630,14 +804,13 @@ public class ChargeMoveType : MovementTypeParent
             HexTile currentTile = selectedUnit.getOccupyingHex();
             HexTile prevTile = null;
             int j = 0;
-            while (j <= ranges[i] || ranges[i] == -1/*For infinite range (Mabye it works)*/)
+            while (j < ranges[i] || ranges[i] == -1/*For infinite range (Mabye it works)*/)
             {
                 currentTile = gameControllerRef.getTileController().getTileFromHexCoord(currentTile.getCoords() + adjustedDirections[i]);
                 if (j >= blockingExtent[i])
                 {
                     if (currentTile)
                     {
-                        currentTile.switchState(TileState.MOVEABLE);
                         if (currentTile.getOccupyingUnit())
                         {
                             if (currentTile.getOccupyingUnit().getTeam() == currentTeam)
@@ -657,7 +830,6 @@ public class ChargeMoveType : MovementTypeParent
                 {
                     if (currentTile)
                     {
-                        currentTile.switchState(TileState.NONSELECTABLE);
                         if (currentTile.getOccupyingUnit())
                         {
                             break;
@@ -680,15 +852,17 @@ public class ChargeMoveType : MovementTypeParent
                 }
                 else if (prevTile.getOccupyingUnit().getTeam() != currentTeam)
                 {
-                    prevTile.switchState(TileState.ATTACKABLE);
+                    prevTile.switchState(TileState.SELECTABLE);
                 }
             }
         }
+
+        drawMovementIcons(selectedUnit);
     }
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE || clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             AbsoluteDirection direction = SpawnTiles.getDirectionToTile(selectedUnit.getOccupyingHex(), clickedTile);
 
@@ -722,7 +896,14 @@ public class ChargeMoveType : MovementTypeParent
                 {
                     if (tile.getOccupyingUnit())
                     {
-                        gameControllerRef.captureUnit(tile.getOccupyingUnit());
+                        if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            gameControllerRef.captureUnit(tile.getOccupyingUnit());
+                        }
                     }
                 }
                 else
@@ -840,6 +1021,101 @@ public class ChargeMoveType : MovementTypeParent
     {
         return new ChargeMoveType(directions, ranges, blockingExtent);
     }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        for (int i = 0; i < adjustedDirections.Count; i++)
+        {
+            HexTile currentTile = selectedUnit.getOccupyingHex();
+            HexTile prevTile = null;
+            //Color drawingColor = Color.yellow;
+            Color drawingColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+            int j = 0;
+            while (j < ranges[i] || ranges[i] == -1)
+            {
+                Vector2 currentTileCoords = currentTile.getCoords() + adjustedDirections[i];
+                currentTile = gameControllerRef.getTileController().getTileFromHexCoord(currentTile.getCoords() + adjustedDirections[i]);
+                if (j >= blockingExtent[i])
+                {
+                    if (currentTile)
+                    {
+                        if (currentTile.getOccupyingUnit())
+                        {
+                            if (currentTile.getOccupyingUnit().getTeam() == selectedUnit.getTeam())
+                            {
+                                createMovementIcon("CrossIcon", currentTileCoords, Color.red, 4);
+                                break;
+                            }
+                            else
+                            {
+                                createMovementIcon("AttackIcon", currentTileCoords, Color.red, 4);
+                                drawingColor = Color.yellow;
+                            }
+                        }
+                        else
+                        {
+                            drawingColor = Color.yellow;
+                        }
+                        prevTile = currentTile;
+                    }
+                    else
+                    {
+                        createMovementIcon("CrossIcon", currentTileCoords, Color.red, 4);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (currentTile)
+                    {
+                        prevTile = currentTile;//Have arrow go to the blocked tile
+                        if (currentTile.getOccupyingUnit())
+                        {
+                            createMovementIcon("CrossIcon", currentTileCoords, Color.red, 4);
+                            break;
+                        }
+                        createMovementIcon("CrossIcon", currentTileCoords, new Color(0.2f, 0.2f, 0.2f, 1.0f), 0);
+                        
+                    }
+                    else
+                    {
+                        createMovementIcon("CrossIcon", currentTileCoords, Color.red, 4);
+                        //drawingColor = new Color(0.2f, 0.2f, 0.2f, 1.0f);
+                        //prevTile = currentTile;
+                        break;
+                    }
+                }
+
+                j++;
+            }
+
+            if (prevTile)
+            {
+                MovementIcon m = createMovementIcon("PathConnectionIcon", selectedUnit.getCoords(), drawingColor, 1);
+                Vector2 lastTileCoords = SpawnTiles.hexCoordToPixelCoord(prevTile.getCoords());
+                Vector2 startTileCoords = SpawnTiles.hexCoordToPixelCoord(selectedUnit.getCoords());
+
+                Vector2 Q = lastTileCoords - startTileCoords;
+                float dist = Q.magnitude * 100 - 15;
+                if (dist < 0)
+                {
+                    dist = 0;
+                }
+                float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
+                //gameControllerRef.printString(dist.ToString());
+                m.transform.Rotate(Vector3.forward, angle);
+                m.transform.localScale = new Vector2(dist / 24, 1.0f);
+
+                MovementIcon mHead = createMovementIcon("ArrowHeadIcon", lastTileCoords, drawingColor, 2, true);
+                mHead.transform.Rotate(Vector3.forward, angle);
+
+                createMovementIcon("PathIcon", lastTileCoords, drawingColor, 3, true);
+            }
+
+            createMovementIcon("PathIcon", selectedUnit.getCoords(), drawingColor, 3);
+
+        }
+    }
 }
 
 
@@ -900,37 +1176,24 @@ public class RangedMoveType : MovementTypeParent
                     {
                         if (tile.getOccupyingUnit().getTeam() != currentTeam)
                         {
-                            for (int k = 0; k < relativeLocations[i].Count; k++ )
+                            for (int k = 0; k < adjustedLocations[i].Count; k++ )
                             {
                                 HexTile tile2 = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][k]);
-                                if (tile2)
-                                {
-                                    tile2.switchState(TileState.ATTACKABLE);
-                                }
-                                tile2.switchState(TileState.ATTACKABLE);
+                                tile2.switchState(TileState.SELECTABLE);
                             }
                             break;
                         }
-                        else
-                        {
-                            tile.switchState(TileState.NONSELECTABLE);
-                            //tile.switchState(TileState.MOVEABLE);
-                        }
-                    }
-                    else
-                    {
-                        //tile.switchState(TileState.MOVEABLE);
-                        tile.switchState(TileState.NONSELECTABLE);
                     }
                 }
             }
         }
+        drawMovementIcons(selectedUnit);
     }
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
 
-        if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
+        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             Vector2 tileLoc = clickedTile.getCoords();
 
@@ -941,11 +1204,15 @@ public class RangedMoveType : MovementTypeParent
                     for (int j = 0; j < adjustedLocations[i].Count; j++)
                     {
                         HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedLocations[i][j]);
-                        if (tile.getOccupyingUnit())
+                        if (tile)
                         {
-                            if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                            if (tile.getOccupyingUnit())
                             {
-                                gameControllerRef.captureUnit(tile.getOccupyingUnit()); 
+                                //removing ones on same team
+                                //if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                                //{
+                                    gameControllerRef.captureUnit(tile.getOccupyingUnit());
+                                //}
                             }
                         }
                     }
@@ -965,13 +1232,7 @@ public class RangedMoveType : MovementTypeParent
                 HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][j]);
                 if (tile)
                 {
-                    if (tile.getOccupyingUnit())
-                    {
-                        if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
-                        {
-                            return true;
-                        }
-                    }
+                    return true;
                 }
             }
         }
@@ -1020,6 +1281,62 @@ public class RangedMoveType : MovementTypeParent
     public override MovementTypeParent clone()
     {
         return new RangedMoveType(relativeLocations);
+    }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        gameControllerRef.printString("Meowsquers");
+        for (int i = 0; i < adjustedLocations.Count; i++)
+        {
+            bool foundEnemy = false;
+            bool foundFriend = false;
+            bool onlyFriends = false;
+            for (int j = 0; j < adjustedLocations[i].Count; j++)
+            {
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedLocations[i][j]);
+                if (tile)
+                {
+                    createMovementIcon("RangedIcon", tile.getCoords(), new Color(0.0f, 1.0f, 0.0f, 1.0f), 0);
+                    if (!foundEnemy && !onlyFriends)
+                    {
+                        if (tile.getOccupyingUnit())
+                        {
+                            if (tile.getOccupyingUnit().getTeam() != selectedUnit.getTeam())
+                            {
+                                foundEnemy = true;
+                                foundFriend = false;
+                                j = -1;
+                                //clearMovementIcons();
+                                continue;
+                            }
+                            else
+                            {
+                                foundFriend = true;
+                            }
+                        }
+
+                        if (foundFriend && j == adjustedLocations[i].Count-1)
+                        {
+                            onlyFriends = true;
+                            j = -1;
+                            //clearMovementIcons();
+                            continue;
+                        }
+                    }
+                    else if (foundEnemy)
+                    {
+                        tile.switchState(TileState.SELECTABLE);
+                        //createMovementIcon("RangedIcon", tile.getCoords(), new Color(0.0f, 1.0f, 0.0f, 1.0f), 0);
+                        createMovementIcon("AttackIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                    else
+                    {
+                        //createMovementIcon("RangedIcon", tile.getCoords(), new Color(0.0f, 1.0f, 0.0f, 1.0f), 0);
+                        createMovementIcon("CrossIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -1083,24 +1400,25 @@ public class RepositionMoveType : MovementTypeParent
 
     public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
     {
+        mode = 0;
         for (int i = 0; i < selectableLocations.Count; i++)
         {
             HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedSelectableLocations[i]);
             if (tile)
             {
-                tile.switchState(TileState.NONSELECTABLE);
                 if (tile.getOccupyingUnit())
                 {
                     if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
                     {
-                        tile.switchState(TileState.SPAWNABLE);
+                        tile.switchState(TileState.SELECTABLE);
                     }
                 }
             }
         }
+        drawMovementIcons(selectedUnit);
     }
 
-    private void drawMoveableTiles(UnitScript selectedUnit, int currentTeam)
+    /*private void drawMoveableTiles(UnitScript selectedUnit, int currentTeam)
     {
         gameControllerRef.getTileController().switchAllTileStates();
         for (int i = 0; i < repositionLocations.Count; i++)
@@ -1119,17 +1437,36 @@ public class RepositionMoveType : MovementTypeParent
                 }
             }
         }
-    }
+    }*/
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
         if (mode == 0)
         {
-            if (clickedTile.getCurrentTileState() == TileState.SPAWNABLE)
+            if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
             {
                 mode = 1;
-                drawMoveableTiles(selectedUnit, currentTeam);
+                //drawMoveableTiles(selectedUnit, currentTeam);
+
+                gameControllerRef.getTileController().switchAllTileStates();
+
+                selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
+                for (int i = 0; i < repositionLocations.Count; i++)
+                {
+                    HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
+                    if (tile)
+                    {
+                        if (!tile.getOccupyingUnit() || tile == clickedTile)
+                        {
+                            tile.switchState(TileState.SELECTABLE);
+                        }
+                    }
+
+                }
+
                 repositioningUnit = clickedTile.getOccupyingUnit();
+                clearMovementIcons();
+                drawMovementIcons(selectedUnit);
                 return;
             }
         }
@@ -1220,181 +1557,47 @@ public class RepositionMoveType : MovementTypeParent
     {
         return new RepositionMoveType(selectableLocations, repositionLocations);
     }
+
+    public override void drawMovementIcons(UnitScript selectedUnit)
+    {
+        if (mode == 0)
+        {
+            for (int i = 0; i < adjustedSelectableLocations.Count; i++)
+            {
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedSelectableLocations[i]);
+                if (tile)
+                {
+                    createMovementIcon("SelectableIcon", tile.getCoords(), new Color(1.0f, 0.8f, 0.8f, 1.0f), 0);
+                    if (tile.getOccupyingUnit())
+                    {
+                        if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                        {
+                            createMovementIcon("CrossIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                        }
+                    }
+                    else
+                    {
+                        createMovementIcon("CrossIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                }
+            }
+        }
+        if (mode == 1)
+        {
+            //gameControllerRef.printString("radaradaradarada");
+            for (int i = 0; i < adjustedRepositionLocations.Count; i++)
+            {
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
+                if (tile)
+                {
+                    createMovementIcon("PlaceIcon", tile.getCoords(), new Color(1.0f, 0.8f, 0.8f, 1.0f), 0);
+                    if (tile.getOccupyingUnit() && tile.getOccupyingUnit() != repositioningUnit)
+                    {
+                        createMovementIcon("CrossIcon", tile.getCoords(), new Color(1.0f, 0.0f, 0.0f, 1.0f), 1);
+                    }
+                }
+            }
+        }
+    }
 }
 
-/////// Old Cached NormalMove
-
-/* public List<List<Vector2>> moveLocations = new List<List<Vector2>>();
- public List<List<Vector2>> blockingLocations = new List<List<Vector2>>();
-
- public PathMoveType(Vector2[][] moveLocs, Vector2[][] blockingLocs)
- {
-     List<List<Vector2>> newMoveLocs = new List<List<Vector2>>();
-     for (int i = 0; i < moveLocs.Length; i++ )
-     {
-         newMoveLocs.Add(Util.toList(moveLocs[i]));
-     }
-     List<List<Vector2>> newBlockingLocs = new List<List<Vector2>>();
-     for (int i = 0; i < blockingLocs.Length; i++)
-     {
-         newBlockingLocs.Add(Util.toList(blockingLocs[i]));
-     }
-        
-     initialize(newMoveLocs, newBlockingLocs);
- }
-
- public void initialize(List<List<Vector2>> moveLocs, List<List<Vector2>> blockingLocs)
- {
-     if (moveLocs.Count != blockingLocs.Count)
-     {
-         throw new UnityException("Move Locations and Blocking Locations do not have the same size, we need to parallelize these lists for simplicity");
-     }
-     if (!testForInvalidPositions(moveLocs))
-     {
-         throw new UnityException("Move Locations have an invalid positions (0,0)");
-     }
-     if (!testForInvalidPositions(blockingLocs))
-     {
-         throw new UnityException("Blocking Locations have an invalid positions (0,0)");
-     }        
-
-     moveLocations = moveLocs;
-     blockingLocations = blockingLocs;
-
-     movementType = MovementTypes.Normal;
- }
-
-
- public override void startSelectingInMode(UnitScript selectedUnit, int currentTeam)
- {
-     List<List<Vector2>> adjustedMoveLocs = new List<List<Vector2>>();
-     List<List<Vector2>> adjustedBlockingLocs = new List<List<Vector2>>();
-
-     for (int i = 0; i < moveLocations.Count; i++)
-     {
-         adjustedMoveLocs.Add(new List<Vector2>());
-         adjustedBlockingLocs.Add(new List<Vector2>());
-         for (int j = 0; j < moveLocations[i].Count; j++)
-         {
-             //print("m: " + moveLocs[i][j]);
-             adjustedMoveLocs[i].Add(SpawnTiles.rotate(moveLocations[i][j], selectedUnit.getRotation()));
-         }
-         for (int j = 0; j < blockingLocations[i].Count; j++)
-         {
-             //print("b: " + blockingLocs[i][j]);
-             adjustedBlockingLocs[i].Add(SpawnTiles.rotate(blockingLocations[i][j], selectedUnit.getRotation()));
-         }
-     }
-
-     for (int i = 0; i < adjustedMoveLocs.Count; i++)
-     {
-         bool blocked = false;
-         for (int j = 0; j < adjustedBlockingLocs[i].Count; j++)
-         {
-             HexTile blockingTile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedBlockingLocs[i][j]);
-             if (blockingTile)
-             {
-                 if (blockingTile.getOccupyingUnit())
-                 {
-                     blocked = true;
-                     break;
-                 }
-             }
-             else
-             {
-                 blocked = true;
-                 break;
-             }
-         }
-
-         if (!blocked)
-         {
-             for (int j = 0; j < adjustedMoveLocs[i].Count; j++)
-             {
-                 HexTile moveTile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + adjustedMoveLocs[i][j]);
-                 if (moveTile)
-                 {
-                     if (moveTile.getOccupyingUnit() == null)
-                     {
-                         moveTile.switchState(TileState.SELECTABLE);
-                     }
-                     else if (moveTile.getOccupyingUnit().getTeam() != currentTeam)
-                     {
-                         moveTile.switchState(TileState.ATTACKABLE);
-                     }
-                 }
-             }
-         }
-     }
- }
-
-
- public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
- {
-     if (clickedTile.getCurrentTileState() == TileState.ATTACKABLE)
-     {
-         gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
-     }
-
-     gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-     //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
-     //switchToNextTeam();
-     gameControllerRef.altCounter = 0;
-
-     gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
- }
-
- public override bool canMove(UnitScript selectedUnit, int currentTeam)
- {
-     for (int i = 0; i < moveLocations.Count; i++)
-     {
-         //Check normal location (optimizaiton)
-         bool good = false;
-         HexTile tile = null;
-         for (int j = 0; j < moveLocations[i].Count; j++)
-         {
-             tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(moveLocations[i][j], selectedUnit.getRotation()));
-             if (tile)
-             {
-                 if (tile.getOccupyingUnit())
-                 {
-                     if (tile.getOccupyingUnit().getTeam() != currentTeam)
-                     {
-                         good = true;
-                         break;
-                     }
-                 }
-                 else
-                 {
-                     good = true;
-                     break;
-                 }
-             }
-         }
-         if (good)
-         {
-             for (int j = 0; j < blockingLocations[i].Count; j++)
-             {
-                 tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.rotate(blockingLocations[i][j], selectedUnit.getRotation()));
-                 if (tile)
-                 {
-                     if (tile.getOccupyingUnit())
-                     {
-                         good = false;
-                         break;
-                     }
-                 }
-                 else
-                 {
-                     good = false;
-                     break;
-                 }
-             }
-         }
-         if (good)
-         {
-             return true;
-         }
-     }
-     return false;
- }*/

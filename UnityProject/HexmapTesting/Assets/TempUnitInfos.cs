@@ -66,14 +66,14 @@ public class TempUnitInfos
     {
 
         ////////////////
-        // King
+        // Lord
         ////////////////
         UnitInfo LordInfo = new UnitInfo();
         LordInfo.unitName = "Lord";
         /*LordInfo.baseSpriteName = "Lord_Base";
         LordInfo.color0SpriteName = "Lord_Colors";*/
-        LordInfo.baseSpriteName = "LordBaseSprite";
-        LordInfo.color0SpriteName = "LordTeamColorSprite";
+        LordInfo.baseSpriteName = "Cory_Lord";
+        LordInfo.color0SpriteName = "Cory_Lord_Colors";
         /*LordInfo.baseSpriteName = "TestUnit_Base";
         LordInfo.color0SpriteName = "TestUnit_Color0";
         LordInfo.color1SpriteName = "TestUnit_Color1";
@@ -216,7 +216,7 @@ public class TempUnitInfos
                 }, 
                 new int[] 
                 { 
-                    -1
+                    3
                     //5
                 }, 
                 new uint[] 
@@ -310,7 +310,8 @@ public class TempUnitInfos
         ////////////////
         UnitInfo repositionUnitInfo = new UnitInfo();
         repositionUnitInfo.unitName = "RepositionUnit";
-        repositionUnitInfo.color0SpriteName = "Diamond_Colors";//Pentagon_Colors
+        repositionUnitInfo.baseSpriteName = "Cory_Commander";//Pentagon_Colors
+        repositionUnitInfo.color0SpriteName = "Cory_Commander_Colors";//Pentagon_Colors
         repositionUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
         { 
             new RepositionMoveType

@@ -18,7 +18,7 @@ public class UnitScript : MonoBehaviour {
     private HexTile occupyingHexTile = null;
     //private List<Vector2> movePositions;
     private int teamNumber = -1;
-    private bool garbage = false;
+    public bool garbage = false;
     private UnitType unitType = UnitType.BasicUnit;
 
     private SpriteRenderer baseSpriteRenderer = null;
@@ -97,7 +97,7 @@ public class UnitScript : MonoBehaviour {
         if (unitInfo.rotationEnabled)
         {
             // Rotation Indicator
-            Vector2 pos = gameControllerRef.getTileController().hexCoordToPixelCoord(this.transform.position);
+            Vector2 pos = SpawnTiles.hexCoordToPixelCoord(this.transform.position);
             rotationIndicator = (GameObject)Instantiate(new GameObject(), new Vector3(pos.x, pos.y, 0), Quaternion.identity);
 
             rotationIndicator.transform.parent = this.transform;
@@ -125,7 +125,7 @@ public class UnitScript : MonoBehaviour {
     public void setOccupyingHex(HexTile newOccupyingHexTile)
     {
         occupyingHexTile = newOccupyingHexTile;
-        this.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(newOccupyingHexTile.getCoords()) + spriteOffset;
+        this.transform.position = SpawnTiles.hexCoordToPixelCoord(newOccupyingHexTile.getCoords()) + spriteOffset;
 
         if (this.baseSpriteRenderer)
             this.baseSpriteRenderer.sortingOrder = (int)(this.transform.position.y * -100);
@@ -151,7 +151,7 @@ public class UnitScript : MonoBehaviour {
                 // Rotation Indicator
                 rotationIndicator.transform.position = this.transform.position;
 
-                Vector2 q = gameControllerRef.getTileController().hexCoordToPixelCoord(SpawnTiles.absoluteDirectionToObject(rotationDir).getUpDirection(), true).normalized;
+                Vector2 q = SpawnTiles.hexCoordToPixelCoord(SpawnTiles.absoluteDirectionToObject(rotationDir).getUpDirection(), true).normalized;
                 rotationIndicator.transform.position = rotationIndicator.transform.position + new Vector3(q.x * 0.3f, q.y * 0.3f, 0.0f);
 
                 rotationIndicator.transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(q.x, q.y) * 180.0f/Mathf.PI - 90.0f, new Vector3(0.0f,0.0f,-1.0f));
@@ -236,10 +236,17 @@ public class UnitScript : MonoBehaviour {
         DestroyObject(color1SpriteRenderer);
         DestroyObject(color2SpriteRenderer);
         DestroyObject(color3SpriteRenderer);
-        DestroyObject(this.gameObject);
-        
+        DestroyObject(this.gameObject);    
     }
 
+
+    public void clearAllMovementIcons()
+    {
+        for (int i = 0; i < unitInfo.movementObjects.Count; i++)
+        {
+            unitInfo.movementObjects[i].clearMovementIcons();
+        }
+    }
 
 
     public void setUnitType(UnitType newUnitType)
