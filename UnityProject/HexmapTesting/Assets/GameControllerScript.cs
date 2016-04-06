@@ -74,7 +74,7 @@ public class GameControllerScript : MonoBehaviour
     public Text tempUIText2;
 
     private bool menuUp = false;
-    
+
     public void setUIText(string text, Color color)
     {
         tempUIText.text = text;
@@ -196,7 +196,7 @@ public class GameControllerScript : MonoBehaviour
 
 
         //Adding all the unit data to dictionary
-        for (int i = 0; i < TempUnitInfos.getTempUnitInfos().Count; i++ )
+        for (int i = 0; i < TempUnitInfos.getTempUnitInfos().Count; i++)
         {
             addNewUnitInfo(TempUnitInfos.getTempUnitInfos()[i]);
         }
@@ -214,11 +214,11 @@ public class GameControllerScript : MonoBehaviour
         spawnUnit("KnightUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 4)), 0, false, AbsoluteDirection.UP);
         spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 5)), 1, false, AbsoluteDirection.UP);
-        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 0, false, AbsoluteDirection.UP);
-        spawnUnit("NormalUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 5)), 1, false, AbsoluteDirection.UP);
+        spawnUnit("SiegeUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("SiegeUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 4)), 0, false, AbsoluteDirection.UP);
         spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 5)), 1, false, AbsoluteDirection.UP);
-        */       
+        */
 
         //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 3)), 0, false, AbsoluteDirection.UP_RIGHT);
         //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 0, false, AbsoluteDirection.UP);
@@ -334,17 +334,17 @@ public class GameControllerScript : MonoBehaviour
             }
             if (Input.GetAxis("Mouse ScrollWheel") != 0.0f)
             {
-                float newZoom = mainCamera.orthographicSize - Input.GetAxis("Mouse ScrollWheel")*zoomRate;
-                if (newZoom >= minZoomSize && newZoom <= maxZoomSize )
+                float newZoom = mainCamera.orthographicSize - Input.GetAxis("Mouse ScrollWheel") * zoomRate;
+                if (newZoom >= minZoomSize && newZoom <= maxZoomSize)
 
-                mainCamera.orthographicSize = newZoom;
+                    mainCamera.orthographicSize = newZoom;
             }
 
             if (Input.GetButtonDown("q"))
             {
                 Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 print("HexCoord at Mouse Position: " + SpawnTiles.pixelCoordToHex(new Vector2(mpos.x, mpos.y)));
-                
+
             }
 
         }
@@ -361,7 +361,7 @@ public class GameControllerScript : MonoBehaviour
         }
 
         UnitScript[] units = FindObjectsOfType<UnitScript>();
-        for (int i = 0; i < units.Length; i++ )
+        for (int i = 0; i < units.Length; i++)
         {
             units[i].justSpawned = false;
         }
@@ -450,9 +450,9 @@ public class GameControllerScript : MonoBehaviour
 
     }
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     // ****** Switch Interaction States ****** //
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     public void switchInteractionState(InteractionStates state)
     {
@@ -541,7 +541,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Lord Location
+    // -- Start Selecting Lord Location
     void startSelectingLordLocation()
     {
         print("Select Team " + currentTeam + "'s Lord Location");
@@ -568,7 +568,7 @@ public class GameControllerScript : MonoBehaviour
         }
     }
 
-// -- Start Selecting Guard Spawn Point
+    // -- Start Selecting Guard Spawn Point
     void startSelectingGuardSpawnPoint()
     {
         //Sadly this is an almost exact copy of the Start Selecting Unit Spawn Point
@@ -624,7 +624,7 @@ public class GameControllerScript : MonoBehaviour
 
     }
 
-// -- Start Selecting Guard Unit Direction
+    // -- Start Selecting Guard Unit Direction
     void startSelectingGuardDirection()
     {
         if (selectedUnit == null)
@@ -687,7 +687,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Unit Spawn Point
+    // -- Start Selecting Unit Spawn Point
     void startSelectingUnitSpawnPoint()
     {
         selectedUnit = null;
@@ -727,7 +727,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Spawned Unit Direction
+    // -- Start Selecting Spawned Unit Direction
     void startSelectingSpawnedUnitDirection()
     {
         if (selectedUnit == null)
@@ -790,7 +790,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Unit To Move
+    // -- Start Selecting Unit To Move
     void startSelectingUnitToMove()
     {
         print("TEAM: " + currentTeam + " --> Select Unit To Move");
@@ -835,7 +835,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Unit Movement
+    // -- Start Selecting Unit Movement
     void startSelectingUnitMovement()
     {
         //SelectedUnit is needed
@@ -871,15 +871,15 @@ public class GameControllerScript : MonoBehaviour
             }
             //if (selectedUnit.getUnitInfo().movementObjects[i].canMove(selectedUnit, currentTeam))
             //{
-                altCounter = iAlt;
-                break;
+            altCounter = iAlt;
+            break;
             //}
         }
         selectedUnit.getUnitInfo().movementObjects[altCounter].startSelectingInMode(selectedUnit, currentTeam);
     }
 
 
-// -- Start Selecting Unit To Rotate
+    // -- Start Selecting Unit To Rotate
     void startSelectingUnitToRotate()
     {
         selectedUnit = null;
@@ -912,7 +912,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Start Selecting Unit Rotation
+    // -- Start Selecting Unit Rotation
     void startSelectingUnitRotation()
     {
         if (selectedUnit == null)
@@ -958,7 +958,7 @@ public class GameControllerScript : MonoBehaviour
             }
 
             AbsoluteDirection rotationDirection = SpawnTiles.relativeToAbsoluteDirection(selectedUnit.getRotation(), relativeDirections[i]);
-            
+
             //Creating Temp Tiles if any just incase
             Vector2 hexCoord = selectedUnit.getOccupyingHex().getCoords() + SpawnTiles.absoluteDirectionToRelativePos(rotationDirection);
 
@@ -970,7 +970,7 @@ public class GameControllerScript : MonoBehaviour
             Vector2 Q = pixCoords - unitCoords;
             float angle = Mathf.Atan2(Q.y, Q.x) * 180 / Mathf.PI;
             pathStartIcon.transform.Rotate(Vector3.forward, angle);
-            Vector2 newRelPosition = Q.normalized * 46/100;
+            Vector2 newRelPosition = Q.normalized * 46 / 100;
 
             pathStartIcon.transform.position = pathStartIcon.transform.position - new Vector3(newRelPosition.x, newRelPosition.y, 1.0f);
             arrowHead.transform.Rotate(Vector3.forward, angle);
@@ -1042,7 +1042,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Lord Location
+    // -- Selecting Lord Location
     void selectingLordLocation(HexTile clickedTile)
     {
         List<HexTile> tiles = tileControllerScript.getAllTiles();
@@ -1079,7 +1079,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Guard Spawn Point
+    // -- Selecting Guard Spawn Point
     void selectingGuardSpawnPoint(HexTile clickedTile)
     {
         // Very close to Selecting Unit Spawn Point but not
@@ -1111,7 +1111,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Unit Spawn Point
+    // -- Selecting Unit Spawn Point
     void selectingUnitSpawnPoint(HexTile clickedTile)
     {
 
@@ -1122,9 +1122,10 @@ public class GameControllerScript : MonoBehaviour
                 "BasicUnit",
                 "SpecialUnit",
                 "KnightUnit",
-                "NormalUnit",
+                "SiegeUnit",
                 "RangedUnit",
-                "RepositionUnit"
+                "RepositionUnit",
+                "BasicUnit2"
             };
 
             selectedUnit = spawnUnit(tempSpawnList[Random.Range(0, tempSpawnList.Length)], clickedTile, currentTeam, true, getTeamController(currentTeam).defaultDirection);
@@ -1135,7 +1136,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Spawned Unit's Direction
+    // -- Selecting Spawned Unit's Direction
     void selectingSpawnedUnitDirection(HexTile clickedTile)
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTED)
@@ -1154,7 +1155,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Unit To Move
+    // -- Selecting Unit To Move
     void selectingUnitToMove(HexTile clickedTile)
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
@@ -1165,7 +1166,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Unit Movement
+    // -- Selecting Unit Movement
     void selectingUnitMovement(HexTile clickedTile)
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTED)
@@ -1183,7 +1184,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Unit To Rotate
+    // -- Selecting Unit To Rotate
     void selectingUnitToRotate(HexTile clickedTile)
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
@@ -1195,7 +1196,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- Selecting Unit Rotation
+    // -- Selecting Unit Rotation
     void selectingUnitRotation(HexTile clickedTile)
     {
         if (clickedTile.getCurrentTileState() == TileState.SELECTED)
@@ -1210,12 +1211,12 @@ public class GameControllerScript : MonoBehaviour
         }
     }
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     // ****** End In Interaction State ****** //
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-// -- End Selecting Guard Direction
+    // -- End Selecting Guard Direction
     void endSelectingGuardDirection()
     {
         tileControllerScript.clearAllTempTiles();
@@ -1223,7 +1224,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- End Selecting Spawned Unit Direction
+    // -- End Selecting Spawned Unit Direction
     void endSelectingSpawnedUnitDirection()
     {
         tileControllerScript.clearAllTempTiles();
@@ -1231,7 +1232,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- End Selecting Unit Rotation
+    // -- End Selecting Unit Rotation
     void endSelectingUnitRotation()
     {
         tileControllerScript.clearAllTempTiles();
@@ -1239,7 +1240,7 @@ public class GameControllerScript : MonoBehaviour
     }
 
 
-// -- End Selecting Unit Movement
+    // -- End Selecting Unit Movement
     void endSelectingUnitMovement(InteractionStates nextInteractionState)
     {
         if (nextInteractionState != InteractionStates.SelectingUnitMovement)
@@ -1251,39 +1252,39 @@ public class GameControllerScript : MonoBehaviour
         clearAllMovementIcons();
     }
 
-// -- End Selecting Lord Location
+    // -- End Selecting Lord Location
     void endSelectingLordLocation()
     {
         print("Meowzeres");
         clearAllMovementIcons();
     }
 
-// -- End Selecting Guard Spawn Point
+    // -- End Selecting Guard Spawn Point
     void endSelectingGuardSpawnPoint()
     {
         clearAllMovementIcons();
     }
 
-// -- End Selecting Unit Spawn Point
+    // -- End Selecting Unit Spawn Point
     void endSelectingUnitSpawnPoint()
     {
         clearAllMovementIcons();
     }
 
-// -- End Selecting Unit To Move
+    // -- End Selecting Unit To Move
     void endSelectingUnitToMove()
     {
         clearAllMovementIcons();
     }
 
-// -- End Selecting Unit To Rotate
+    // -- End Selecting Unit To Rotate
     void endSelectingUnitToRotate()
     {
         clearAllMovementIcons();
     }
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------//
-// ----------------------------------------------------------------------------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 };

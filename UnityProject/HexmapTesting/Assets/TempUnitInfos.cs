@@ -86,13 +86,16 @@ public class TempUnitInfos
             (
                 new Vector2[]
                 { 
-                    vec(0,-1), vec(1,-1), vec(1,0), vec(0,1), vec(-1,1), vec(-1,0)
+                    vec(0,1), vec(1,-1),  vec(-1,0)
                 },
                 true //Verify Move
             )
         });
-        LordInfo.rotationEnabled = false;
-        LordInfo.relativeRotationDirections = new List<RelativeDirection>();
+        LordInfo.rotationEnabled = true;
+        LordInfo.relativeRotationDirections = Util.toList(new RelativeDirection[]
+        {
+            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT, RelativeDirection.BACKWARD
+        });
         tempUnitInfos.Add(LordInfo);
 
 
@@ -102,26 +105,78 @@ public class TempUnitInfos
         ////////////////
         UnitInfo basicUnitInfo = new UnitInfo();
         basicUnitInfo.unitName = "BasicUnit";
-        basicUnitInfo.baseSpriteName = "Cory_Catapult";
-        basicUnitInfo.color0SpriteName = "Cory_Catapult_Colors";
+        basicUnitInfo.baseSpriteName = "Axel_Swordsman";
+        basicUnitInfo.color0SpriteName = "Axel_Swordsman_Colors";
         basicUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
-        { 
+        {
+            new PathMoveType
+            (
+                new PathMoveType.PathPos[][]
+                {
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(0, 1), false),
+                        pathPos( vec(0, 2), true)
+                    }
+                },
+                true //Verify Move
+            ),
             new JumpMoveType
             (
                 new Vector2[]
-                { 
-                    vec(0,2), vec(1,0), vec(-1,1) 
+                {
+                    vec(1,0), vec(-1,1)
                 },
                 true //Verify Move
             )
         });
         basicUnitInfo.rotationEnabled = true;
-        basicUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
+        basicUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[]
         {
-            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT 
+            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT, RelativeDirection.BACKWARD
         });
         tempUnitInfos.Add(basicUnitInfo);
-
+        ////////////////
+        // Basic Unit2
+        ////////////////
+        UnitInfo basicUnit2Info = new UnitInfo();
+        basicUnit2Info.unitName = "BasicUnit2";
+        basicUnit2Info.baseSpriteName = "Axel_Spearman";
+        basicUnit2Info.color0SpriteName = "Axel_Spearman_Colors";
+        basicUnit2Info.movementObjects = Util.toList(new MovementTypeParent[]
+        {
+            new PathMoveType
+            (
+                new PathMoveType.PathPos[][]
+                {
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(-1,1), false),
+                        pathPos( vec(-1, 2), true)
+                    },                    
+                    new PathMoveType.PathPos[]
+                    {
+                        pathPos( vec(1,0), false),
+                        pathPos( vec(1, 1), true)
+                    }
+                },
+                true //Verify Move
+            ),
+            new JumpMoveType
+            (
+                new Vector2[]
+                {
+                    vec(0,1)
+                },
+                true //Verify Move
+            )
+        });
+        basicUnit2Info.rotationEnabled = true;
+        basicUnit2Info.relativeRotationDirections = Util.toList(new RelativeDirection[]
+        {
+            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT, RelativeDirection.BACKWARD
+        });
+        tempUnitInfos.Add(basicUnit2Info);
 
         ////////////////
         //Ranged Unit
@@ -138,12 +193,8 @@ public class TempUnitInfos
                 { 
                     new Vector2[]
                     {
-                        vec(0, 3), vec(0,4), vec(-1,4), vec(1,3)
+                        vec(0, 2)
                     },
-                    new Vector2[]
-                    {
-                        vec(1,0), vec(1,-1), vec(2,-1)
-                    }
                 },
                 true //Verify Move
             ), 
@@ -151,7 +202,7 @@ public class TempUnitInfos
             (
                 new Vector2[]
                 { 
-                    vec(0, 1), vec(0,-1)
+                    vec(0, 1), vec(-1,0)
                 },
                 true //Verify Move
             )
@@ -172,21 +223,15 @@ public class TempUnitInfos
         specialUnitInfo.baseSpriteName = "Axel_Theif";
         specialUnitInfo.color0SpriteName = "Axel_Theif_Colors";
         specialUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
-        { 
-            new SlideMoveType
-            ( 
-                //new Vector2[] 
-                new RelativeDirection[]
-                { 
-                    RelativeDirection.FORWARD
-                    //RotationDirectionObject.UP.getUpDirection() 
-                }, 
-                new int[] 
-                { 
-                    -1//3 -1 means infinite range
+        {
+            new JumpMoveType
+            (
+                new Vector2[]
+                {
+                    vec(-2,3), vec(2,1), vec(-1,-1), vec(1,-2)
                 },
                 true //Verify Move
-            ) 
+            )
         });
         specialUnitInfo.rotationEnabled = true;
         specialUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
@@ -216,7 +261,7 @@ public class TempUnitInfos
                 }, 
                 new int[] 
                 { 
-                    3
+                    4
                     //5
                 }, 
                 new uint[] 
@@ -239,69 +284,38 @@ public class TempUnitInfos
         knightUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[]
         { 
             RelativeDirection.FORWARD_LEFT, RelativeDirection.FORWARD_RIGHT 
-        } );
+        });
         tempUnitInfos.Add(knightUnitInfo);
 
 
         ////////////////
-        //Normal Unit
+        //Siege Unit
         ////////////////
-        UnitInfo normalUnitInfo = new UnitInfo();
-        normalUnitInfo.unitName = "NormalUnit";
-        normalUnitInfo.baseSpriteName = "Axel_Swordsman";//Pentagon_Colors
-        normalUnitInfo.color0SpriteName = "Axel_Swordsman_Colors";//Pentagon_Colors
-        normalUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
-        { 
-            new PathMoveType
+        UnitInfo siegeUnitInfo = new UnitInfo();
+        siegeUnitInfo.unitName = "SiegeUnit";
+        siegeUnitInfo.baseSpriteName = "Cory_Catapult";//Pentagon_Colors
+        siegeUnitInfo.color0SpriteName = "Cory_Catapult_Colors";//Pentagon_Colors
+        siegeUnitInfo.movementObjects = Util.toList(new MovementTypeParent[] 
+        {
+            new RangedMoveType
             (
-                new PathMoveType.PathPos[][]
+                new Vector2[][]
                 {
-                    /*new PathMoveType.PathPos[]
+                    new Vector2[]
                     {
-                        pathPos( vec(0, 1), false),
-                        pathPos( vec(0, 2), true),
-                        pathPos( vec(0, 3), false),
-                        pathPos( vec(1, 3), true)
+                        vec(0, 2),vec(1,2),vec(-1,2)
                     },
-                    new PathMoveType.PathPos[]
-                    {
-                        pathPos( vec(0, 1), false),
-                        pathPos( vec(0, 2), true),
-                        pathPos( vec(0, 3), false),
-                        pathPos( vec(-1, 4), true)
-                    }*/
-                    new PathMoveType.PathPos[]
-                    {
-                        pathPos( vec(1, 0), false),
-                        pathPos( vec(1, 1), false),
-                        pathPos( vec(1, 2), false),
-                        pathPos( vec(0, 3), true)
-                    },
-                    new PathMoveType.PathPos[]
-                    {
-                        pathPos( vec(-1, 1), false),
-                        pathPos( vec(-1, 2), false),
-                        pathPos( vec(-1, 3), false),
-                        pathPos( vec(0, 3), true)
-                    }
                 },
                 true //Verify Move
             ),
-            new JumpMoveType
-            (
-                new Vector2[]
-                {
-                    vec(1,0), vec(-1,1)
-                },
-                true //Verify Move
-            )
+            
         });
-        normalUnitInfo.rotationEnabled = true;
-        normalUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
+        siegeUnitInfo.rotationEnabled = true;
+        siegeUnitInfo.relativeRotationDirections = Util.toList(new RelativeDirection[] 
         { 
-            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT, RelativeDirection.BACKWARD_LEFT, RelativeDirection.BACKWARD_RIGHT 
+            RelativeDirection.FORWARD_RIGHT, RelativeDirection.FORWARD_LEFT
         });
-        tempUnitInfos.Add(normalUnitInfo);
+        tempUnitInfos.Add(siegeUnitInfo);
 
 
 
@@ -345,7 +359,7 @@ public class TempUnitInfos
             (
                 new Vector2[]
                 {
-                    vec(1,0), vec(0,1), vec(1,-1), vec(0,-1), vec(-1,0), vec(-1,1)
+                     vec(0,1), vec(1,-1),  vec(-1,0)
                 },
                 true //Verify Move
             )

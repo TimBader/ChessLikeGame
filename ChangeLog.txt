@@ -1,6 +1,10 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.12 ]
+Author: James Asher
+- Implemented basic set of units
+
 [ v0.0.11 ]
 Author: Tim Bader
 - Added in Axel's art stuff.  The Spearman art is not attached to a character since I ran out of temp chars and im too lazy to add another... James get on the rest of the chars
