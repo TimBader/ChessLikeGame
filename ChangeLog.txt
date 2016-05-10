@@ -1,6 +1,17 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.13 ]
+Author: Tim Bader
+- Spawned Units now have defualt facing directions of the lord
+- Lord spawn locations now have arrows showing the defualted direction of the spawning lord
+- MovementIcons renamed to InteractionIcons
+- InteractionIcons now exclusivily handle the creation and deletion of the InteractionIcons
+- Created a PrefabResourceManager to handle getting prefabs from Resources
+- Put all the assets in nice little folders
+- Seperated the MoveTypes into their own individual scripts
+- Many tiny bugs and code fails fixed
+
 [ v0.0.12 ]
 Author: James Asher
 - Implemented basic set of units
