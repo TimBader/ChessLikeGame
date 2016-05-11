@@ -93,19 +93,16 @@ public class SlideMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        if (clickedTile.getOccupyingUnit())
         {
-            if (clickedTile.getOccupyingUnit())
-            {
-                gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
-            }
-
-            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-            //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
-            //switchToNextTeam();
-
-            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
         }
+
+        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+        //selectedUnit.transform.position = gameControllerRef.getTileController().hexCoordToPixelCoord(clickedTile.getCoords());
+        //switchToNextTeam();
+
+        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)

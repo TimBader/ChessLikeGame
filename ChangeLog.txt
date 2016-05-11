@@ -1,6 +1,16 @@
 Chess-Like Game Change Log
 ------
 
+[ v0.0.14 ]
+Author: Tim Bader
+- Selecting another friendly unit while selecting a move that is not currently selected by that move, you will switch to that unit instead
+- Click and hold left or right click to drag camera
+- First Attempt at moving all controls to the mouse for more intuitive controls (Old controls still there)
+- Clicking on same unit will cycle between moves and deselect when the unit has no more moves
+- Added some delay to mouse clicks
+
+- Some more code fiddling
+
 [ v0.0.13 ]
 Author: Tim Bader
 - Spawned Units now have defualt facing directions of the lord

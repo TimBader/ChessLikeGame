@@ -8,6 +8,7 @@ public class CameraMovement : MonoBehaviour {
     public Vector2 vDirection = new Vector2(0.0f, 1.0f);
 
     public bool RightMouseButtonHeldDown = false;
+    public bool LeftMouseButtonHeldDown = false;
 
     public Vector3 prevMousePosition = new Vector3(0, 0, 0);
 
@@ -18,7 +19,7 @@ public class CameraMovement : MonoBehaviour {
         direction += hDirection * Input.GetAxisRaw("Horizontal") + vDirection * Input.GetAxisRaw("Vertical");
 
         // Mouse  Stuff thats wierd
-        if (RightMouseButtonHeldDown)
+        if (RightMouseButtonHeldDown || LeftMouseButtonHeldDown)
         {
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition) - prevMousePosition;
             transform.position += (Vector3)(hDirection * -mousePos.x + vDirection * -mousePos.y);
@@ -41,6 +42,15 @@ public class CameraMovement : MonoBehaviour {
         if (Input.GetButtonUp("Fire2"))
         {
             RightMouseButtonHeldDown = false;
+        }
+
+        if (Input.GetButtonDown("Fire1"))
+        {
+            LeftMouseButtonHeldDown = true;
+        }
+        if (Input.GetButtonUp("Fire1"))
+        {
+            LeftMouseButtonHeldDown = false;
         }
 
 	}

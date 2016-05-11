@@ -57,7 +57,10 @@ public class GameControllerScript : MonoBehaviour
 
     //private List<UnitInfo> tempUnitInfos = new List<UnitInfo>();
 
-    private float rightClickTimeCache;
+    private float rightClickDownTime = 0.0f;
+    private float leftClickDownTime = 0.0f;
+    private float rightDoubleClickTime = 0.0f;
+    private float leftDoubleClickTime = 0.0f;
 
     private float escapeTimeCache;
 
@@ -201,7 +204,7 @@ public class GameControllerScript : MonoBehaviour
         setUIText("Temp", Color.black);
 
         //Testing
-        /*spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(0, 4)), 0, false, AbsoluteDirection.UP);
+        spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(0, 4)), 0, false, AbsoluteDirection.UP);
         spawnUnit("BasicUnit", tileControllerScript.getTileFromHexCoord(new Vector2(0, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 4)), 0, false, AbsoluteDirection.UP);
         spawnUnit("SpecialUnit", tileControllerScript.getTileFromHexCoord(new Vector2(1, 5)), 1, false, AbsoluteDirection.UP);
@@ -215,7 +218,7 @@ public class GameControllerScript : MonoBehaviour
         spawnUnit("SiegeUnit", tileControllerScript.getTileFromHexCoord(new Vector2(5, 5)), 1, false, AbsoluteDirection.UP);
         spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 4)), 0, false, AbsoluteDirection.UP);
         spawnUnit("RangedUnit", tileControllerScript.getTileFromHexCoord(new Vector2(6, 5)), 1, false, AbsoluteDirection.UP);
-        */
+        
 
         //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(4, 3)), 0, false, AbsoluteDirection.UP_RIGHT);
         //spawnUnit("RepositionUnit", tileControllerScript.getTileFromHexCoord(new Vector2(3, 5)), 0, false, AbsoluteDirection.UP);
@@ -265,7 +268,7 @@ public class GameControllerScript : MonoBehaviour
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                if ((EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.layer != 5) || EventSystem.current.currentSelectedGameObject == null)
+                /*if ((EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.layer != 5) || EventSystem.current.currentSelectedGameObject == null)
                 {
                     //print("TITTY TWISTERS!!!");
                     Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -274,19 +277,61 @@ public class GameControllerScript : MonoBehaviour
                     {
                         clickedOnTile(hexTile);
                     }
-                }
+                }*/
+                leftClickDownTime = Time.time;
             }
-            if (Input.GetButtonDown("Fire2"))
+            else if (Input.GetButtonUp("Fire1"))
             {
-                float diff = Time.time - rightClickTimeCache;
-
-                if (diff <= 0.20)
+                float diff = Time.time - leftClickDownTime;
+                if (diff <= 0.2)
                 {
+                    if ((EventSystem.current.currentSelectedGameObject != null && EventSystem.current.currentSelectedGameObject.layer != 5) || EventSystem.current.currentSelectedGameObject == null)
+                    {
+                        //print("TITTY TWISTERS!!!");
+                        Vector3 mpos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                        HexTile hexTile = tileControllerScript.getTileAtPixelPos(mpos, true);
+                        if (hexTile != null)
+                        {
+                            clickedOnTile(hexTile);
+                        }
+                    }
+                }
+                float doubleClickDiff = Time.time - leftDoubleClickTime;
+                if (doubleClickDiff <= 0.2)
+                {
+
+                }
+                leftDoubleClickTime = Time.time;
+            }
+            else if (Input.GetButtonDown("Fire2"))
+            {
+                //float diff = Time.time - rightClickTimeCache;
+
+                //if (diff <= 0.20)
+                //{
                     /*if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
                     {
                         switchInteractionState(InteractionStates.SelectingUnitToMove);
-                    }*/
+                    }
 
+                    if (interactionState == InteractionStates.SelectingUnitMovement)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    }
+
+                    if (interactionState == InteractionStates.SelectingUnitRotation)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToRotate);
+                    }*/
+                //}
+
+                rightClickDownTime = Time.time;
+            }
+            else if (Input.GetButtonUp("Fire2"))
+            {
+                float diff = Time.time - rightClickDownTime;
+                if (diff <= 0.2)
+                {
                     if (interactionState == InteractionStates.SelectingUnitMovement)
                     {
                         switchInteractionState(InteractionStates.SelectingUnitToMove);
@@ -297,11 +342,23 @@ public class GameControllerScript : MonoBehaviour
                         switchInteractionState(InteractionStates.SelectingUnitToRotate);
                     }
                 }
+                float doubleClickDiff = Time.time - rightDoubleClickTime;
+                if (doubleClickDiff <= 0.2)
+                {
+                    if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection || interactionState == InteractionStates.SelectingGuardDirection)
+                    {
+                        switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    }
 
-                rightClickTimeCache = Time.time;
+                    if (interactionState == InteractionStates.SelectingUnitToRotate)
+                    {
+                        switchToNextTeam();
+                    }
+
+                }
+                rightDoubleClickTime = Time.time;
             }
-
-            if (Input.GetButtonDown("Jump"))
+            else if (Input.GetButtonDown("Jump"))
             {
                 if (interactionState == InteractionStates.SelectingUnitSpawnPoint || interactionState == InteractionStates.SelectingSpawnedUnitDirection)
                 {
@@ -885,6 +942,12 @@ public class GameControllerScript : MonoBehaviour
             break;
             //}
         }
+
+        if (selectedUnit.getUnitInfo().movementObjects.Count > 1)
+        {
+            InteractionIcon.createInteractionIcon("AlternateIcon", selectedUnit.getPixelCoords(), Color.yellow, 5, true);
+        }
+
         selectedUnit.getUnitInfo().movementObjects[altCounter].startSelectingInMode(selectedUnit, currentTeam);
     }
 
@@ -1183,13 +1246,38 @@ public class GameControllerScript : MonoBehaviour
         {
             if (selectedUnit == clickedTile.getOccupyingUnit())
             {
-                switchInteractionState(InteractionStates.SelectingUnitToMove);
+                //switchInteractionState(InteractionStates.SelectingUnitToMove);
+                altCounter++;
+                if (altCounter >= selectedUnit.getUnitInfo().movementObjects.Count)
+                {
+                    altCounter = 0;
+                    switchInteractionState(InteractionStates.SelectingUnitToMove);
+                    return;
+                }
+
+                switchInteractionState(InteractionStates.SelectingUnitMovement);
+                return;
             }
         }
-        else if (clickedTile.getCurrentTileState() != TileState.NONE)
+        else if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
         {
             selectedUnit.getUnitInfo().movementObjects[altCounter].clickedInMode(clickedTile, selectedUnit, currentTeam);
-
+        }
+        else if (clickedTile.getCurrentTileState() == TileState.NONE)
+        {
+            if (clickedTile.getOccupyingUnit() && clickedTile.getOccupyingUnitTeam() == currentTeam)
+            {
+                if (clickedTile.getOccupyingUnit().justSpawned)
+                {
+                    selectedUnit = null;
+                    switchInteractionState(InteractionStates.SelectingUnitToMove);
+                }
+                else
+                {
+                    selectedUnit = clickedTile.getOccupyingUnit();
+                    switchInteractionState(InteractionStates.SelectingUnitMovement);
+                }
+            }
         }
     }
 

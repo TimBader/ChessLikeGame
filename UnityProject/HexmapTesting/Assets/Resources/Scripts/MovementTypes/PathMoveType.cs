@@ -106,16 +106,13 @@ public class PathMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        if (clickedTile.getOccupyingUnit())
         {
-            if (clickedTile.getOccupyingUnit())
-            {
-                gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
-            }
-
-            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+            gameControllerRef.captureUnit(clickedTile.getOccupyingUnit());
         }
+
+        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)
@@ -207,7 +204,7 @@ public class PathMoveType : MovementTypeParent
         {
             bool blocked = false;
             HexTile lastTile = selectedUnit.getOccupyingHex();
-            InteractionIcon.createInteractionIcon("PathIcon", selectedUnit.getCoords(), Color.blue, 2);
+            InteractionIcon.createInteractionIcon("PathIcon", selectedUnit.getCoords(), new Color(0.0f,0.0f,1.0f,1.0f), 2);
             for (int j = 0; j < adjustedPathList[i].Count; j++)
             {
                 Vector2 tileCoords = selectedUnit.getOccupyingHex().getCoords() + adjustedPathList[i][j].pos;
@@ -228,7 +225,7 @@ public class PathMoveType : MovementTypeParent
                             blocked = true;
                             if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam() || !adjustedPathList[i][j].moveable)
                             {
-                                InteractionIcon.createInteractionIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 1.0f), 3);
+                                InteractionIcon.createInteractionIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 0.4f), 3);
                             }
                             else
                             {
@@ -265,7 +262,7 @@ public class PathMoveType : MovementTypeParent
                 }
                 else
                 {
-                    InteractionIcon.createInteractionIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 1.0f), 3);
+                    InteractionIcon.createInteractionIcon("CrossIcon", tileCoords, new Color(1.0f, 0.0f, 0.0f, 0.4f), 3);
                     break;
                 }
             }

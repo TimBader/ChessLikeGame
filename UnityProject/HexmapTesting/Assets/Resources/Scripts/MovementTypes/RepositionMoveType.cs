@@ -104,47 +104,41 @@ public class RepositionMoveType : MovementTypeParent
     {
         if (mode == 0)
         {
-            if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+            mode = 1;
+            //drawMoveableTiles(selectedUnit, currentTeam);
+
+            gameControllerRef.getTileController().switchAllTileStates();
+
+            selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
+            for (int i = 0; i < repositionLocations.Count; i++)
             {
-                mode = 1;
-                //drawMoveableTiles(selectedUnit, currentTeam);
-
-                gameControllerRef.getTileController().switchAllTileStates();
-
-                selectedUnit.getOccupyingHex().switchState(TileState.SELECTED);
-                for (int i = 0; i < repositionLocations.Count; i++)
+                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
+                if (tile)
                 {
-                    HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedRepositionLocations[i]);
-                    if (tile)
+                    if (!tile.getOccupyingUnit() || tile == clickedTile)
                     {
-                        if (!tile.getOccupyingUnit() || tile == clickedTile)
-                        {
-                            tile.switchState(TileState.SELECTABLE);
-                        }
+                        tile.switchState(TileState.SELECTABLE);
                     }
-
                 }
 
-                repositioningUnit = clickedTile.getOccupyingUnit();
-                InteractionIcon.clearAllInteractionIcons();
-                drawMovementIcons(selectedUnit);
-                return;
             }
+
+            repositioningUnit = clickedTile.getOccupyingUnit();
+            InteractionIcon.clearAllInteractionIcons();
+            drawMovementIcons(selectedUnit);
+            return;
         }
 
         if (mode == 1)
         {
-            if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+            if (!clickedTile.getOccupyingUnit())
             {
-                if (!clickedTile.getOccupyingUnit())
-                {
-                    gameControllerRef.getTileController().transferUnit(repositioningUnit.getOccupyingHex(), clickedTile);
-                }
-                repositioningUnit.setRotationDirection(selectedUnit.getRotation());
-                mode = 0;
-                repositioningUnit = null;
-                gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+                gameControllerRef.getTileController().transferUnit(repositioningUnit.getOccupyingHex(), clickedTile);
             }
+            repositioningUnit.setRotationDirection(selectedUnit.getRotation());
+            mode = 0;
+            repositioningUnit = null;
+            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
     }
 

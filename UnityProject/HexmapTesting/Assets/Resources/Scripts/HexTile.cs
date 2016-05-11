@@ -16,10 +16,10 @@ public enum TileState
 public class HexTile : MonoBehaviour {
 
     public Sprite baseSprite;
-    /*public Sprite selectedSprite;
-    public Sprite moveableSprite;
+    public Sprite selectedSprite;
+    //public Sprite moveableSprite;
     public Sprite selectableSprite;
-    public Sprite attackableSprite;
+    /*public Sprite attackableSprite;
     public Sprite spawnableSprite;*/
     public Sprite nonSelectableSprite;
     //Sets this tile to be a location in which a king of the specific team could be spawned on, -1 for no king spawning
@@ -49,7 +49,7 @@ public class HexTile : MonoBehaviour {
         {
             spriteRendererRef.sprite = nonSelectableSprite;
         }*/
-        /*switch (state)
+        switch (state)
         {
             case TileState.NONE:
                 spriteRendererRef.sprite = baseSprite;
@@ -78,7 +78,7 @@ public class HexTile : MonoBehaviour {
             //case TileState.NONSELECTABLE:
                 //spriteRendererRef.sprite = nonSelectableSprite;
                 //break;
-        }*/
+        }
     }
 
 
@@ -142,11 +142,11 @@ public class HexTile : MonoBehaviour {
 
 
     
-    public bool testOccupyingUnitTeam(int otherTeam, bool returnIfNoOccuypingUnit = false)
+    public bool testOccupyingUnitTeam(int teamNum, bool returnIfNoOccuypingUnit = false)
     {
         if (!getOccupyingUnit())
             return returnIfNoOccuypingUnit;
-        return (occupyingUnit.getTeam() == otherTeam);
+        return (occupyingUnit.getTeam() == teamNum);
     }
 
 

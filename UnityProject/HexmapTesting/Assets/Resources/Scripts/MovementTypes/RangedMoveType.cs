@@ -74,35 +74,31 @@ public class RangedMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
+        Vector2 tileLoc = clickedTile.getCoords();
 
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        for (int i = 0; i < adjustedLocations.Count; i++)
         {
-            Vector2 tileLoc = clickedTile.getCoords();
-
-            for (int i = 0; i < adjustedLocations.Count; i++)
+            if (adjustedLocations[i].Contains(tileLoc - selectedUnit.getCoords()))
             {
-                if (adjustedLocations[i].Contains(tileLoc - selectedUnit.getCoords()))
+                for (int j = 0; j < adjustedLocations[i].Count; j++)
                 {
-                    for (int j = 0; j < adjustedLocations[i].Count; j++)
+                    HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedLocations[i][j]);
+                    if (tile)
                     {
-                        HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + adjustedLocations[i][j]);
-                        if (tile)
+                        if (tile.getOccupyingUnit())
                         {
-                            if (tile.getOccupyingUnit())
-                            {
-                                //removing ones on same team
-                                //if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
-                                //{
-                                gameControllerRef.captureUnit(tile.getOccupyingUnit());
-                                //}
-                            }
+                            //removing ones on same team
+                            //if (tile.getOccupyingUnitTeam() != selectedUnit.getTeam())
+                            //{
+                            gameControllerRef.captureUnit(tile.getOccupyingUnit());
+                            //}
                         }
                     }
                 }
             }
-
-            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
         }
+
+        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)

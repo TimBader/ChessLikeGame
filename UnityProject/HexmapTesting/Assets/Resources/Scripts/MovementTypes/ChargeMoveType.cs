@@ -110,60 +110,57 @@ public class ChargeMoveType : MovementTypeParent
 
     public override void clickedInMode(HexTile clickedTile, UnitScript selectedUnit, int currentTeam)
     {
-        if (clickedTile.getCurrentTileState() == TileState.SELECTABLE)
+        AbsoluteDirection direction = TileController.getDirectionToTile(selectedUnit.getOccupyingHex(), clickedTile);
+
+        if (direction == AbsoluteDirection.NONE)
         {
-            AbsoluteDirection direction = TileController.getDirectionToTile(selectedUnit.getOccupyingHex(), clickedTile);
+            return;
+        }
 
-            if (direction == AbsoluteDirection.NONE)
+        Vector2 posDir = TileController.absoluteDirectionToRelativePos(direction);
+
+        int pos = -1;
+        for (int i = 0; i < directions.Count; i++)
+        {
+            if (posDir == adjustedDirections[i])
             {
-                return;
+                pos = i;
+                break;
             }
+        }
+        if (pos == -1)
+        {
+            throw new UnityException("Issue: Charged move click on tile error, selected tile that has been marked but is NOT in any direction");
+        }
 
-            Vector2 posDir = TileController.absoluteDirectionToRelativePos(direction);
+        int j = 0;
+        while (j < ranges[pos] || ranges[pos] == -1)
+        {
+            HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + posDir * (j + 1));
 
-            int pos = -1;
-            for (int i = 0; i < directions.Count; i++)
+            if (tile)
             {
-                if (posDir == adjustedDirections[i])
+                if (tile.getOccupyingUnit())
                 {
-                    pos = i;
-                    break;
-                }
-            }
-            if (pos == -1)
-            {
-                throw new UnityException("Issue: Charged move click on tile error, selected tile that has been marked but is NOT in any direction");
-            }
-
-            int j = 0;
-            while (j < ranges[pos] || ranges[pos] == -1)
-            {
-                HexTile tile = gameControllerRef.getTileController().getTileFromHexCoord(selectedUnit.getCoords() + posDir * (j + 1));
-
-                if (tile)
-                {
-                    if (tile.getOccupyingUnit())
+                    if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
                     {
-                        if (tile.getOccupyingUnitTeam() == selectedUnit.getTeam())
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            gameControllerRef.captureUnit(tile.getOccupyingUnit());
-                        }
+                        break;
+                    }
+                    else
+                    {
+                        gameControllerRef.captureUnit(tile.getOccupyingUnit());
                     }
                 }
-                else
-                {
-                    break;
-                }
-                j++;
             }
-
-            gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
-            gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
+            else
+            {
+                break;
+            }
+            j++;
         }
+
+        gameControllerRef.getTileController().transferUnit(selectedUnit.getOccupyingHex(), clickedTile);
+        gameControllerRef.switchInteractionState(InteractionStates.SelectingUnitToRotate);
     }
 
     public override bool canMove(UnitScript selectedUnit, int currentTeam)

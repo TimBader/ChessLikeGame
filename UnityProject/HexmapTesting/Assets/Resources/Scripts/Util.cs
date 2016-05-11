@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class Util : MonoBehaviour 
+public static class Util
 {
     public static List<T> toList<T>(T[] oList)
     {
@@ -12,5 +12,10 @@ public class Util : MonoBehaviour
             list.Add(oList[i]);
         }
         return list;
+    }
+
+    public static Color alphaColor(Color oColor, float newAlpha)
+    {
+        return new Color(oColor.r, oColor.g, oColor.b, newAlpha);
     }
 }
